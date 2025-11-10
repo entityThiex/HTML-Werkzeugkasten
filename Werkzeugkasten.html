@@ -121,7 +121,7 @@
         this.instanceId = BaseField.instanceCounter;  // Speichere aktuelle Nummer in der Instanz
         
         this.type = options.type || "base";         
-        this.title = options.title || "Feld";       // intern gespeichert
+        this.title = options.title;       // intern gespeichert
         this.infoText = options.infoText || "";     
         this.required = !!options.required;
         this.x = options.x || 50;
@@ -199,7 +199,7 @@
 
         // Titel (intern gespeichert, nicht sichtbar im Header)
         const titleLabel = document.createElement("label");
-        titleLabel.textContent = "Titel (wird später im fertigen HTML angezeigt):";
+        titleLabel.textContent = "Titel";
 
         const titleInput = document.createElement("input");
         titleInput.type = "text";
@@ -211,7 +211,7 @@
 
         // Zusatzinfo (Tooltip)
         const infoLabel = document.createElement("label");
-        infoLabel.textContent = "Zusatzinfo (Tooltip beim Hover über dem Titel):";
+        infoLabel.textContent = "Zusatzinfo";
 
         const infoInput = document.createElement("textarea");
         infoInput.rows = 2;
@@ -286,6 +286,46 @@
       }
     }
     // Hinweis: toConfigObject() liefert später alle wichtigen Daten für HTML-Generierung
+
+    class Textfield extends BaseField {
+      constructor(options) {
+        super({ ...options, type: "text" });
+        this.createTextInput();
+        this.titleEl.textContent = "Textfeld";
+      }
+
+      createTextInput() {
+        const wrapper = document.createElement("div");
+        
+        // Label hinzufügen
+        const label = document.createElement("label");
+        label.textContent = "Text";
+        label.style.display = "block";
+        label.style.marginBottom = "4px";
+        label.style.fontSize = "12px";
+        
+        // Input erstellen
+        const input = document.createElement("input");
+        input.type = "text";
+        input.style.width = "100%";
+        input.style.boxSizing = "border-box";
+        
+        // Alles zusammenfügen
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        this.bodyEl.appendChild(wrapper);
+      }
+    }
+    // Beispiel: Erstelle ein Textfeld
+    /*
+      const textField = new Textfield({
+        title: "",
+        infoText: "",
+        required: true,
+        x: 100,
+        y: 100
+      });
+    */
   </script>
 </body>
 </html>
