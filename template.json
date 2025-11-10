@@ -1,18 +1,38 @@
 {
   "form": {
-    "fields": {
-      "id" : {"specs":  "", "usw": 2}
-    },
-    "script": {
-      "id" : {"specs":  "", "usw": 2}
-    }
+    "fields": [
+      {
+        "id" : "id1",
+        "html": "code"
+      }, {
+        "id" : "id2",
+        "html": "code"
+      }],
+    "script":[
+      {
+        "id" : "id1",
+        "html": "code"
+      }, {
+        "id" : "id2",
+        "html": "code"
+      }]
   },
   "eval": {
-    "fields": {
-      "id" : {"specs":  "", "usw": 2}
-    },
-    "script": {
-      "id" : {"specs":  "", "usw": 2}
-    }
+    "fields": [
+      {
+        "id" : "id1",
+        "html": "code"
+      }, {
+        "id" : "id2",
+        "html": "code"
+      }],
+    "script": [
+      {
+        "id" : "id1",
+        "html": "code"
+      }, {
+        "id" : "id2",
+        "html": "code"
+      }]
   }
 }

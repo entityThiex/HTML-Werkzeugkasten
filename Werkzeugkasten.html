@@ -287,5 +287,152 @@
     }
     // Hinweis: toConfigObject() liefert später alle wichtigen Daten für HTML-Generierung
   </script>
+
+
+  <div>
+    <button onclick="downloadBuilder()">Aktuellen Stand Speichern</button>
+    <button onclick="exportBuilder()">Aktuellen Stand Exportieren</button>
+  </div>
+  <script>
+
+    function downloadBuilder(){
+      var jsonLink = document.createElement('a');
+      jsonLink.href = URL.createObjectURL(getSpecsBlob());
+      jsonLink.download = 'myTextFile.txt';
+      jsonLink.click();
+    }
+
+    function exportBuilder(){
+      var formLink = document.createElement('a');
+      formLink.href = URL.createObjectURL(getFormBlob());
+      formLink.download = 'myTextFile.txt';
+      formLink.click();
+      var evalLink = document.createElement('a');
+      evalLink.href = URL.createObjectURL(getEvalBlob());
+      evalLink.download = 'myTextFile.txt';
+      evalLink.click();
+    }
+
+    let specs = {
+      "form": {
+        "fields": [],
+        "scripts": []
+      },
+      "eval": {
+        "fields": [],
+        "scripts": []
+      }
+    }
+
+    let defaultSpecs = {
+      "form": {
+        "fields": [],
+        "scripts": []
+      },
+      "eval": {
+        "fields": [],
+        "scripts": []
+      }
+    }
+
+
+    function createFormFromJson(){
+      return createHTMLFromJson("form");
+    }
+
+    function createEvalFromJson(){
+      return createHTMLFromJson("eval");
+    }
+
+    function createHTMLFromJson(type){
+      let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
+      let html = new HtmlObj();
+      fields.forEach(html.append());
+
+      let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
+      scripts.forEach(html.append());
+
+      return html;
+    }
+
+    function getSpecsBlob(){
+      let jsonSpecs = new JsonObj(specs);
+      return jsonSpecs.getDownloadFile();
+    }
+
+    function getFormBlob(){
+      let htmlForm = createFormFromJson();
+      return htmlForm.getDownloadFile();
+    }
+
+    function getEvalBlob(){
+      let htmlEval = createEvalFromJson();
+      return htmlEval.getDownloadFile();
+    }
+
+    function createZip(json, files){
+
+    }
+
+    function loadFile(){
+
+    }
+
+    class Obj{
+      blob;
+      fileURL;
+      link;
+
+      constructor() {
+
+      }
+
+      getDownloadFile(data, type){ // TODO if there is a better option
+        return new Blob([data], {type: ''});
+      }
+
+      getContent(){}
+    }
+
+    class HtmlObj extends Obj{
+      htmlText = "";
+
+      constructor(html = ""){
+        super();
+        this.htmlText = html;
+      }
+
+      append(jsonHtml){
+        if(jsonHtml instanceof JSON && jsonHtml.has("html"));
+        this.htmlText+=jsonHtml["html"];
+        return this;
+      }
+
+      getDownloadFile() {
+        super.getDownloadFile(this.htmlText, 'text/html');
+      }
+
+      getContent() {
+        return this.htmlText;
+      }
+    }
+
+    class JsonObj extends Obj{
+      json = {}
+      constructor(json) {
+        super();
+        this.json = json;
+      }
+
+      getDownloadFile() {
+        super.getDownloadFile(this.json, 'application/json');
+      }
+
+      getContent() {
+        return this.json;
+      }
+    }
+  </script>
+</body>
 </body>
 </html>
