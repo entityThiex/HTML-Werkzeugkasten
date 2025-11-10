@@ -382,7 +382,37 @@
 
     }
 
-    
+    class PictureField extends BaseField {
+
+        constructor(options){
+            super({...options, type: "picture", title: "Bild" });
+            this.createPictureInput()
+        }
+
+        createPictureInput() {
+            const wrapper = document.createElement("div");
+
+            // Label
+            const label = document.createElement("label");
+            label.textContent = "Bild Feld";
+            label.style.display = "block";
+            label.style.marginBottom = "4px";
+            label.style.fontSize = "12px";
+
+            // Input
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*"
+            input.style.width = "100%";
+            input.style.boxSizing = "border-box";
+
+            // Combine the ELEMENTS!!!!
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            this.bodyEl.appendChild(wrapper);
+        }
+
+    }
   </script>
 </body>
 </html>
