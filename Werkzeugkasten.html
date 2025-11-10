@@ -114,7 +114,12 @@
   <script>
     // ===== Oberklasse: BaseField =====
     class BaseField {
+      static instanceCounter = 0;  // Statische Variable für alle Instanzen
+
       constructor(options) {
+        BaseField.instanceCounter++;  // Erhöhe Zähler bei jeder neuen Instanz
+        this.instanceId = BaseField.instanceCounter;  // Speichere aktuelle Nummer in der Instanz
+        
         this.type = options.type || "base";         
         this.title = options.title || "Feld";       // intern gespeichert
         this.infoText = options.infoText || "";     
