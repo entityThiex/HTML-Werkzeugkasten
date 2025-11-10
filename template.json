@@ -1,0 +1,18 @@
+{
+  "form": {
+    "fields": {
+      "id" : {"specs":  "", "usw": 2}
+    },
+    "script": {
+      "id" : {"specs":  "", "usw": 2}
+    }
+  },
+  "eval": {
+    "fields": {
+      "id" : {"specs":  "", "usw": 2}
+    },
+    "script": {
+      "id" : {"specs":  "", "usw": 2}
+    }
+  }
+}
