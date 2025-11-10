@@ -495,6 +495,101 @@
         y: 100
       });
     */
+
+    class DateField extends BaseField {
+
+        constructor(options){
+            super({...options, type: "date", title: "Datum"});
+            this.createDateInput()
+        }
+
+        createDateInput() {
+            const wrapper = document.createElement("div");
+
+            // Label
+            const label = document.createElement("label");
+            label.textContent = "Datum Feld";
+            label.style.display = "block";
+            label.style.marginBottom = "4px";
+            label.style.fontSize = "12px";
+
+            // Input
+            const input = document.createElement("input");
+            input.type = "date";
+            input.style.width = "100%";
+            input.style.boxSizing = "border-box";
+
+            // Combine the ELEMENTS!!!!
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            this.bodyEl.appendChild(wrapper);
+        }
+
+    }
+
+    // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
+    class InfoField extends BaseField {
+
+        constructor(options){
+            super({...options, type: "info", title: "Info", required: false});
+            this.createInfoInput()
+        }
+
+        createInfoInput() {
+            const wrapper = document.createElement("div");
+
+            // Label
+            const label = document.createElement("label");
+            label.textContent = "Info Feld";
+            label.style.display = "block";
+            label.style.marginBottom = "4px";
+            label.style.fontSize = "12px";
+
+            // Input
+            const input = document.createElement("input");
+            input.type = "text";
+            input.style.width = "100%";
+            input.style.boxSizing = "border-box";
+
+            // Combine the ELEMENTS!!!!
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            this.bodyEl.appendChild(wrapper);
+        }
+
+    }
+
+    class PictureField extends BaseField {
+
+        constructor(options){
+            super({...options, type: "picture", title: "Bild" });
+            this.createPictureInput()
+        }
+
+        createPictureInput() {
+            const wrapper = document.createElement("div");
+
+            // Label
+            const label = document.createElement("label");
+            label.textContent = "Bild Feld";
+            label.style.display = "block";
+            label.style.marginBottom = "4px";
+            label.style.fontSize = "12px";
+
+            // Input
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*"
+            input.style.width = "100%";
+            input.style.boxSizing = "border-box";
+
+            // Combine the ELEMENTS!!!!
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            this.bodyEl.appendChild(wrapper);
+        }
+
+    }
    
   </script>
 </body>
