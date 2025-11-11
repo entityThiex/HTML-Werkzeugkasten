@@ -13,7 +13,8 @@
 
     #form-builder {
       position: relative;
-      width: 100%;
+      margin: 0 auto;
+      width: 50%;
       height: 100%;
       background: #f0f0f0;
     }
@@ -116,7 +117,9 @@
     }
 
     .dropdown {
-        position: relative;
+        position: Fixed;
+        top: 0;
+        left: 0;
         display: inline-block;
     }
     .dropdown-content {
@@ -147,7 +150,7 @@
   </style>
 </head>
 <body>
-  <!--div id="form-builder"></div-->
+  <div id="form-builder"></div>
 
 
 
@@ -685,7 +688,7 @@
         }
     }
 
-    /*
+
     const pictureField = new PictureField({
         title: "",
         infoText: "",
@@ -694,7 +697,7 @@
         y: 100
     });
 
-     */
+
 
     class NumberField extends BaseField {
 
