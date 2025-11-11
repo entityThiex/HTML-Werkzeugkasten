@@ -173,7 +173,13 @@
           <button id="exportBtn">Exportieren</button>
       </div>
   </div>
-  <button class="dropbtn">Import</button>
+  <div class="dropdown">
+      <button class="dropbtn" id="importBtn">Import</button>
+      <div class="dropdown-content">
+          <input id="importFile" type="file" accept="*/*" style="width: 100%; box-sizing: border-box;">
+      </div>
+  </div>
+
 
   <div id="form-builder" style="overflow-y: scroll"></div>
 
@@ -181,10 +187,10 @@
   <script>
     // ===== Oberklasse: BaseField =====
     class BaseField {
-      constructor(options) {
-          specs["vars"]["id-counter"]++ // Erhöhe Zähler bei jeder neuen Instanz
-          this.instanceId = specs["vars"]["id-counter"];  // Speichere aktuelle Nummer in der Instanz
-        
+      constructor(options){
+           // Erhöhe Zähler bei jeder neuen Instanz
+          this.instanceId = options.id || specs["vars"]["id-counter"]++;  // Speichere aktuelle Nummer in der Instanz
+
         this.type = options.type || "base";         
         this.title = options.title || "";       // intern gespeichert
         this.infoText = options.infoText || "";     
@@ -263,6 +269,7 @@
               currentY += field.offsetHeight + 10;
             });
           }, 0);
+            removeField(this);
         });
 
         rightHeader.appendChild(cb);
@@ -402,6 +409,7 @@
         const rect = this.el.getBoundingClientRect();
         const parentRect = this.el.parentElement.getBoundingClientRect();
         return {
+            id: this.instanceId,
           type: this.type,
           title: this.title,         // gespeicherter individueller Titel
           infoText: this.infoText,   // gespeicherter Tooltip
@@ -409,10 +417,6 @@
           x: rect.left - parentRect.left,
           y: rect.top - parentRect.top
         };
-      }
-
-      toHtml(){
-
       }
 
         getID(){
@@ -699,6 +703,7 @@
             const rect = this.el.getBoundingClientRect();
             const parentRect = this.el.parentElement.getBoundingClientRect();
             return {
+                id: this.instanceId,
                 type: this.type,
                 title: this.title,         // gespeicherter individueller Titel
                 infoText: this.infoText,   // gespeicherter Tooltip
@@ -1182,14 +1187,42 @@ formBuilder.addEventListener('drop', (e) => {
           container.innerHTML = "";
 
           let formSpecs = specs[formType]["fields"];
+          console.log(formSpecs);
+          console.log(formSpecs.length);
           for(let i = 0; i < formSpecs.length; i++){
-              window[formSpecs[i]["class"]](formSpecs[i]["config"]);
+              console.log("started"+i+". time looping");
+              renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
+              console.log("created a "+formSpecs[i]["class"]);
+              console.log("finished "+i+". time looping");
+          }
+      }
+
+      function renderField(type, args){
+          switch (type){
+              case "Textfield":
+                  return new Textfield(args);
+              case "DropDownfield":
+                  return new DropDownfield(args);
+              case "DateField":
+                  return new DateField(args);
+              case "InfoField":
+                  return new InfoField(args);
+              case "PictureField":
+                  return new PictureField(args);
+              case "FileField":
+                  return new FileField(args);
+              case "NumberField":
+                  return new NumberField(args);
+              case "Radio_MultipleChoicefield":
+                  return new Radio_MultipleChoicefield(args);
+              default:
+                  return null;
           }
       }
 
       function insertField(field, formType = "form"){
           let id = field.getID();
-          let pos = getFieldPos(id);
+          let pos = getFieldPos(field);
           if(pos != null){
               return updateField(field, formType);
           }
@@ -1199,7 +1232,6 @@ formBuilder.addEventListener('drop', (e) => {
                   "id" : id,
                   "class": field.constructor.name,
                   "htmlType": "body",
-                  "html": field.toHtml(),
                   "config": field.toConfigObject(),
                   "files": field.getFiles()
               }
@@ -1212,7 +1244,7 @@ formBuilder.addEventListener('drop', (e) => {
               return false;
 
           if(pos == null)
-              pos = getFieldPos(field.getID());
+              pos = getFieldPos(field);
 
           if(targetPos === pos)
               return true;
@@ -1239,23 +1271,22 @@ formBuilder.addEventListener('drop', (e) => {
               return false;
 
           if(pos == null)
-              pos = getFieldPos(field.getID());
+              pos = getFieldPos(field);
 
           let fieldSpecs = specs[formType]["fields"][pos];
           fieldSpecs["htmlType"] = "body";
           fieldSpecs["config"] = field.toConfigObject();
-          fieldSpecs["html"] = field.toHtml();
           fieldSpecs["files"] = field.getFiles();
 
           return true;
       }
 
-      function getFieldPos(fieldID, formType = "form"){
+      function getFieldPos(field, formType = "form"){
           let fields = specs[formType]["fields"];
           if(fields != null && fields instanceof Array && fields.length > 0){
               let i = 0;
               while(i < fields.length){
-                  if(fields[i] != null && fields[i]["id"] === fieldID)
+                  if(fields[i] != null && fields[i]["id"] === field.getID())
                       return i;
                   i++;
               }
@@ -1264,11 +1295,23 @@ formBuilder.addEventListener('drop', (e) => {
               return null;
           }
       }
+
+      function removeField(field, formType = "form"){
+          if(field == null || !(field instanceof BaseField))
+              return false;
+
+          let fields = specs[formType]["fields"];
+          moveField(field, fields.length-1);
+          fields.pop();
+          render();
+      }
+
   </script>
   <script>
       // script for updating and saving
       function downloadBuilder(){
           let jsonLink = document.createElement('a');
+          console.log(specs);
           jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
           jsonLink.download = 'specs.json';
           jsonLink.click();
@@ -1284,6 +1327,20 @@ formBuilder.addEventListener('drop', (e) => {
           evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
           evalLink.download = 'eval.html';
           evalLink.click();
+      }
+
+      function importBuilder(){
+          let file = document.getElementById("importFile").files[0];
+          if(file){
+              let reader = new FileReader();
+              reader.readAsText(file, "UTF-8");
+              reader.onload = function(evt){
+                  console.log("loading...")
+                  console.log(evt.target.result);
+                  loadJson(JSON.parse(evt.target.result));
+                  render();
+              }
+          }
       }
 
       function createFormFromJson(){
@@ -1329,7 +1386,7 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function loadJson(json){
-          if(json != null && json instanceof JSON && json.has("vars") && json.has("fields") && json.has("scripts")){
+          if(json != null){
               specs = json;
           }
           else {
@@ -1407,6 +1464,7 @@ formBuilder.addEventListener('drop', (e) => {
       }
       document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
       document.getElementById("exportBtn").onclick = function() {exportBuilder()};
+      document.getElementById("importBtn").onclick = function() {importBuilder()};
   </script>
 </body>
 </html>

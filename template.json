@@ -6,20 +6,17 @@
     "fields": [
       {
         "id" : "id0",
-        "formhtmlType": "header",
-        "html": "code",
+        "class": "Textfield",
         "config": {},
         "files": []
       }, {
         "id" : "id1",
-        "formhtmlType": "body",
-        "html": "code",
+        "class": "Textfield",
         "config": {},
         "files": []
       }, {
         "id" : "id2",
-        "formhtmlType" : "footer",
-        "html": "code",
+        "class": "Textfield",
         "config": {},
         "files": []
       }],
@@ -46,20 +43,16 @@
       {
         "id" : "id0",
         "class": "Textfield",
-        "htmlType": "header",
-        "html": "code",
         "config": {},
         "files": []
       }, {
         "id" : "id1",
-        "htmlType": "body",
+        "class": "Textfield",
         "config": {},
-        "html": "code",
         "files": []
       }, {
         "id" : "id2",
-        "htmlType" : "footer",
-        "html": "code",
+        "class": "Textfield",
         "config": {},
         "files": []
       }],
