@@ -124,11 +124,11 @@
     }
     .dropdown-content {
         display: none;
-        position: absolute;
+        position: fixed;
         background-color: #f1f1f1;
         min-width: 160px;
         box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-        z-index: 1;
+        z-index: 2;
     }
 
     .dropdown-content button {
@@ -147,36 +147,58 @@
 
     /* Change the background color of the dropdown button when the dropdown content is shown */
     .dropdown:hover .dropbtn {background-color: #3e8e41;}
+
+    .topmenu {
+        height: 50px;
+        width: 100%;
+        position: sticky;
+        top: 0;
+        overflow-y: visible;
+        z-index: 1;
+    }
+
+    .page {
+        overflow-y: auto;
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
   </style>
 </head>
 <body>
 
 
-
-  <div class="dropdown">
-      <button class="dropbtn">Hinzufügen</button>
-      <div class="dropdown-content">
-          <button onclick="addTextField()">Text</button>
-          <button onclick="addInfoField()">Info</button>
-          <button onclick="addNumberField()">Zahlen</button>
-          <button onclick="addDateField()">Datum</button>
-          <button onclick="addPictureField()">Bild</button>
-          <button onclick="addFileField()">Datei</button>
-          <button onclick="addDropdownField()">Dropdown</button>
-          <button onclick="addMultipleChoiceField()">Mehrfachauswahl</button>
+    <div class="topmenu">
+      <div class="dropdown">
+          <button class="dropbtn">Hinzufügen</button>
+          <div class="dropdown-content">
+              <button onclick="addTextField()">Text</button>
+              <button onclick="addInfoField()">Info</button>
+              <button onclick="addNumberField()">Zahlen</button>
+              <button onclick="addDateField()">Datum</button>
+              <button onclick="addPictureField()">Bild</button>
+              <button onclick="addFileField()">Datei</button>
+              <button onclick="addDropdownField()">Dropdown</button>
+              <button onclick="addMultipleChoiceField()">Mehrfachauswahl</button>
+          </div>
       </div>
-  </div>
-  <div class="dropdown">
-      <button class="dropbtn">Export</button>
-      <div class="dropdown-content">
-          <button id="saveBtn">Speichern</button>
-          <button id="exportBtn">Exportieren</button>
+
+      <div class="dropdown">
+          <button class="dropbtn">Export</button>
+          <div class="dropdown-content">
+              <button id="saveBtn">Speichern</button>
+              <button id="exportBtn">Exportieren</button>
+          </div>
       </div>
-  </div>
-  <button class="dropbtn">Import</button>
 
-  <div id="form-builder" style="overflow-y: scroll"></div>
+      <button class="dropbtn">Import</button>
 
+    </div>
+
+
+    <div class="page">
+      <div id="form-builder"></div>
+    </div>
 
   <script>
     // ===== Oberklasse: BaseField =====
