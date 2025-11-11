@@ -11,24 +11,27 @@
 <script>
     function downloadBuilder(){
         let jsonLink = document.createElement('a');
-        jsonLink.href = URL.createObjectURL(getSpecsBlob());
+        jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
         jsonLink.download = 'specs.json';
         jsonLink.click();
     }
 
     function exportBuilder(){
         let formLink = document.createElement('a');
-        formLink.href = URL.createObjectURL(getFormBlob());
+        formLink.href = URL.createObjectURL(new File([getFormBlob()], "form.html"));
         formLink.download = 'form.html';
         formLink.click();
 
         let evalLink = document.createElement('a');
-        evalLink.href = URL.createObjectURL(getEvalBlob());
+        evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
         evalLink.download = 'eval.html';
         evalLink.click();
     }
 
     let specs = {
+        "vars": {
+            "id-counter": 0
+        },
         "form": {
             "fields": [],
             "scripts": []
@@ -50,7 +53,6 @@
         }
     }
 
-
     function createFormFromJson(){
         return createHTMLFromJson("form");
     }
@@ -62,10 +64,14 @@
     function createHTMLFromJson(type){
         let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
         let html = new HtmlObj();
-        fields.forEach(html.append());
+        if (fields != null && fields instanceof Array && fields.length > 0){
+            fields.forEach(html.append());
+        }
 
         let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
-        scripts.forEach(html.append());
+        if (scripts != null && scripts instanceof Array && scripts.length > 0){
+            scripts.forEach(html.append());
+        }
 
         return html.finish();
     }
@@ -99,10 +105,8 @@
         }
 
         getDownloadFile(data, type){ // TODO if there is a better option
-            return new Blob([data], {type: ''});
+            return new Blob([data], {type: type});
         }
-
-        getContent(){}
     }
 
     class HtmlObj extends Obj{
@@ -117,7 +121,7 @@
         }
 
         append(jsonHtml){
-            if(jsonHtml instanceof JSON && jsonHtml.has("html")){
+            if(jsonHtml != null && jsonHtml instanceof JSON && jsonHtml.has("html")){
                 if (jsonHtml.has("type") && jsonHtml["type"] === "header"){
                     this.htmlHeader += jsonHtml["html"];
                 }
@@ -140,7 +144,7 @@
         }
 
         getDownloadFile() {
-            super.getDownloadFile(this.fullHtml, 'text/html');
+            return super.getDownloadFile(this.fullHtml, 'text/html');
         }
 
         getContent() {
@@ -156,7 +160,7 @@
         }
 
         getDownloadFile() {
-            super.getDownloadFile(this.json, 'application/json');
+            return super.getDownloadFile(JSON.stringify(this.json), 'application/json');
         }
 
         getContent() {
