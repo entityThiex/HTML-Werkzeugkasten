@@ -2,36 +2,60 @@
   "form": {
     "fields": [
       {
+        "id" : "id0",
+        "type": "header",
+        "html": "code"
+      }, {
         "id" : "id1",
+        "type": "body",
         "html": "code"
       }, {
         "id" : "id2",
+        "type" : "footer",
         "html": "code"
       }],
     "script":[
       {
+        "id" : "id0",
+        "type": "header",
+        "html": "code"
+      }, {
         "id" : "id1",
+        "type": "body",
         "html": "code"
       }, {
         "id" : "id2",
+        "type" : "footer",
         "html": "code"
       }]
   },
   "eval": {
     "fields": [
       {
+        "id" : "id0",
+        "type": "header",
+        "html": "code"
+      }, {
         "id" : "id1",
+        "type": "body",
         "html": "code"
       }, {
         "id" : "id2",
+        "type" : "footer",
         "html": "code"
       }],
-    "script": [
+    "script":[
       {
+        "id" : "id0",
+        "type": "header",
+        "html": "code"
+      }, {
         "id" : "id1",
+        "type": "body",
         "html": "code"
       }, {
         "id" : "id2",
+        "type" : "footer",
         "html": "code"
       }]
   }

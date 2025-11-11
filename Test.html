@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<button id="saveBtn">Aktuellen Stand Speichern</button>
+<button id="exportBtn">Aktuellen Stand Exportieren</button>
+
+<script>
+    function downloadBuilder(){
+        let jsonLink = document.createElement('a');
+        jsonLink.href = URL.createObjectURL(getSpecsBlob());
+        jsonLink.download = 'specs.json';
+        jsonLink.click();
+    }
+
+    function exportBuilder(){
+        let formLink = document.createElement('a');
+        formLink.href = URL.createObjectURL(getFormBlob());
+        formLink.download = 'form.html';
+        formLink.click();
+
+        let evalLink = document.createElement('a');
+        evalLink.href = URL.createObjectURL(getEvalBlob());
+        evalLink.download = 'eval.html';
+        evalLink.click();
+    }
+
+    let specs = {
+        "form": {
+            "fields": [],
+            "scripts": []
+        },
+        "eval": {
+            "fields": [],
+            "scripts": []
+        }
+    }
+
+    let defaultSpecs = {
+        "form": {
+            "fields": [],
+            "scripts": []
+        },
+        "eval": {
+            "fields": [],
+            "scripts": []
+        }
+    }
+
+
+    function createFormFromJson(){
+        return createHTMLFromJson("form");
+    }
+
+    function createEvalFromJson(){
+        return createHTMLFromJson("eval");
+    }
+
+    function createHTMLFromJson(type){
+        let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
+        let html = new HtmlObj();
+        fields.forEach(html.append());
+
+        let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
+        scripts.forEach(html.append());
+
+        return html.finish();
+    }
+
+    function getSpecsBlob(){
+        let jsonSpecs = new JsonObj(specs);
+        return jsonSpecs.getDownloadFile();
+    }
+
+    function getFormBlob(){
+        let htmlForm = createFormFromJson();
+        return htmlForm.getDownloadFile();
+    }
+
+    function getEvalBlob(){
+        let htmlEval = createEvalFromJson();
+        return htmlEval.getDownloadFile();
+    }
+
+    function createZip(json, files){
+
+    }
+
+    function loadFile(){
+
+    }
+
+    class Obj{
+        constructor() {
+
+        }
+
+        getDownloadFile(data, type){ // TODO if there is a better option
+            return new Blob([data], {type: ''});
+        }
+
+        getContent(){}
+    }
+
+    class HtmlObj extends Obj{
+        fullHtml = "";
+        htmlHeader = "<header>";
+        htmlBody = "<body>";
+        htmlFooter = "<footer>";
+
+        constructor(html = "<!DOCTYPE html><html lang=\"de\">"){
+            super();
+            this.fullHtml = html;
+        }
+
+        append(jsonHtml){
+            if(jsonHtml instanceof JSON && jsonHtml.has("html")){
+                if (jsonHtml.has("type") && jsonHtml["type"] === "header"){
+                    this.htmlHeader += jsonHtml["html"];
+                }
+                else if (jsonHtml.has("type") && jsonHtml["type"] === "body") {
+                    this.htmlBody += jsonHtml["html"];
+                }
+                else if (jsonHtml.has("type") && jsonHtml["type"] === "footer") {
+                    this.htmlFooter += jsonHtml["html"];
+                }
+            }
+            return this;
+        }
+
+        finish(){
+            this.htmlHeader += "</header>";
+            this.htmlBody += "</body>";
+            this.htmlFooter += "</footer>";
+            this.fullHtml += this.htmlHeader+this.htmlBody+this.htmlFooter+"</html>";
+            return this;
+        }
+
+        getDownloadFile() {
+            super.getDownloadFile(this.fullHtml, 'text/html');
+        }
+
+        getContent() {
+            return this.fullHtml;
+        }
+    }
+
+    class JsonObj extends Obj{
+        json = {}
+        constructor(json) {
+            super();
+            this.json = json;
+        }
+
+        getDownloadFile() {
+            super.getDownloadFile(this.json, 'application/json');
+        }
+
+        getContent() {
+            return this.json;
+        }
+    }
+    document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
+    document.getElementById("exportBtn").onclick = function() {exportBuilder()};
+</script>
+</body>
+</html>

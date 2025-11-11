@@ -110,7 +110,6 @@
 </head>
 <body>
   <div id="form-builder"></div>
-
   <script>
     // ===== Oberklasse: BaseField =====
     class BaseField {
@@ -289,27 +288,25 @@
   </script>
 
 
-  <div>
-    <button onclick="downloadBuilder()">Aktuellen Stand Speichern</button>
-    <button onclick="exportBuilder()">Aktuellen Stand Exportieren</button>
-  </div>
+  <button onclick="downloadBuilder()">Aktuellen Stand Speichern</button>
+  <button onclick="exportBuilder()">Aktuellen Stand Exportieren</button>
   <script>
-
     function downloadBuilder(){
-      var jsonLink = document.createElement('a');
+      let jsonLink = document.createElement('a');
       jsonLink.href = URL.createObjectURL(getSpecsBlob());
-      jsonLink.download = 'myTextFile.txt';
+      jsonLink.download = 'specs.json';
       jsonLink.click();
     }
 
     function exportBuilder(){
-      var formLink = document.createElement('a');
+      let formLink = document.createElement('a');
       formLink.href = URL.createObjectURL(getFormBlob());
-      formLink.download = 'myTextFile.txt';
+      formLink.download = 'form.html';
       formLink.click();
-      var evalLink = document.createElement('a');
+
+      let evalLink = document.createElement('a');
       evalLink.href = URL.createObjectURL(getEvalBlob());
-      evalLink.download = 'myTextFile.txt';
+      evalLink.download = 'eval.html';
       evalLink.click();
     }
 
@@ -352,7 +349,7 @@
       let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
       scripts.forEach(html.append());
 
-      return html;
+      return html.finish();
     }
 
     function getSpecsBlob(){
@@ -379,10 +376,6 @@
     }
 
     class Obj{
-      blob;
-      fileURL;
-      link;
-
       constructor() {
 
       }
@@ -395,25 +388,45 @@
     }
 
     class HtmlObj extends Obj{
-      htmlText = "";
+      fullHtml = "";
+      htmlHeader = "<header>";
+      htmlBody = "<body>";
+      htmlFooter = "<footer>";
 
-      constructor(html = ""){
+      constructor(html = "<!DOCTYPE html><html lang=\"de\">"){
         super();
-        this.htmlText = html;
+        this.fullHtml = html;
       }
 
       append(jsonHtml){
-        if(jsonHtml instanceof JSON && jsonHtml.has("html"));
-        this.htmlText+=jsonHtml["html"];
+        if(jsonHtml instanceof JSON && jsonHtml.has("html")){
+          if (jsonHtml.has("type") && jsonHtml["type"] === "header"){
+            this.htmlHeader += jsonHtml["html"];
+          }
+          else if (jsonHtml.has("type") && jsonHtml["type"] === "body") {
+            this.htmlBody += jsonHtml["html"];
+          }
+          else if (jsonHtml.has("type") && jsonHtml["type"] === "footer") {
+            this.htmlFooter += jsonHtml["html"];
+          }
+        }
+        return this;
+      }
+
+      finish(){
+        this.htmlHeader += "</header>";
+        this.htmlBody += "</body>";
+        this.htmlFooter += "</footer>";
+        this.fullHtml += this.htmlHeader+this.htmlBody+this.htmlFooter+"</html>";
         return this;
       }
 
       getDownloadFile() {
-        super.getDownloadFile(this.htmlText, 'text/html');
+        super.getDownloadFile(this.fullHtml, 'text/html');
       }
 
       getContent() {
-        return this.htmlText;
+        return this.fullHtml;
       }
     }
 
@@ -433,6 +446,5 @@
       }
     }
   </script>
-</body>
 </body>
 </html>
