@@ -270,7 +270,7 @@
         this.requiredCheckbox = cb; //Speichert die direkte Referenz für späteres Abfragen
 
         const cbLabel = document.createElement("span");
-        cbLabel.textContent = "Pflicht"; /Text für Label
+        cbLabel.textContent = "Pflicht"; //Text für Label
 
         const reqIndicator = document.createElement("span");
         reqIndicator.className = "field-required-indicator";
@@ -1527,7 +1527,10 @@ formBuilder.addEventListener('drop', (e) => {
       }
       document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
       document.getElementById("exportBtn").onclick = function() {exportBuilder()};
-      document.getElementById("importBtn").onclick = function() {importBuilder()};
+      document.getElementById("importBtn").onclick = function() {
+          importBuilder();
+          document.getElementById("importFile").value = "";
+      };
   </script>
 </body>
 </html>
