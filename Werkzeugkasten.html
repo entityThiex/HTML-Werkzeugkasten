@@ -243,6 +243,25 @@
         }
         this.titleEl = titleSpan;
 
+      const btnUp = document.createElement("button");
+      btnUp.className = "move-btn";
+      btnUp.textContent = "^"
+      const field = this.el;
+      const parent = this
+      btnUp.onclick = function () {
+          container.insertBefore(field, field.previousElementSibling);
+          parent.repositionAllFields();
+      };
+
+      const btnDown = document.createElement("button");
+      btnDown.className = "move-btn";
+      btnDown.textContent = "v"
+      btnDown.onclick = function () {
+          console.log(field);
+          container.insertBefore(field.nextElementSibling, field);
+          parent.repositionAllFields()
+      }
+
         const rightHeader = document.createElement("div");
         rightHeader.className = "field-required";
 
