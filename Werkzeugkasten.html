@@ -121,7 +121,7 @@
         this.instanceId = BaseField.instanceCounter;  // Speichere aktuelle Nummer in der Instanz
         
         this.type = options.type || "base";         
-        this.title = options.title;       // intern gespeichert
+        this.title = options.title || "";       // intern gespeichert
         this.infoText = options.infoText || "";     
         this.required = !!options.required;
         this.x = options.x || 50;
@@ -717,7 +717,7 @@
     class DateField extends BaseField {
 
         constructor(options){
-            super({...options, type: "date", title: "Datum"});
+            super({...options, type: "date"});
             this.createDateInput()
         }
 
@@ -742,15 +742,29 @@
             wrapper.appendChild(input);
             this.bodyEl.appendChild(wrapper);
         }
-
     }
 
+    /*
+    const dateField = new DateField({
+        title: "",
+        infoText: "",
+        required: true,
+        x: 100,
+        y: 100
+    });
+
+     */
+
     // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
+    // Ist frei ziehbar, sollte auch nicht sein
     class InfoField extends BaseField {
 
+
+
         constructor(options){
-            super({...options, type: "info", title: "Info", required: false});
-            this.createInfoInput()
+            super({...options, type: "info", required: false});
+            this.value
+            this.createInfoInput();
         }
 
         createInfoInput() {
@@ -764,8 +778,9 @@
             label.style.fontSize = "12px";
 
             // Input
-            const input = document.createElement("input");
-            input.type = "text";
+            const input = document.createElement("textarea");
+            input.rows = 2;
+            this.value = input.value
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
 
@@ -775,13 +790,37 @@
             this.bodyEl.appendChild(wrapper);
         }
 
+        toConfigObject() {
+            const rect = this.el.getBoundingClientRect();
+            const parentRect = this.el.parentElement.getBoundingClientRect();
+            return {
+                type: this.type,
+                title: this.title,         // gespeicherter individueller Titel
+                infoText: this.infoText,   // gespeicherter Tooltip
+                required: this.required,
+                content: this.value,
+                x: rect.left - parentRect.left,
+                y: rect.top - parentRect.top
+            };
+        }
     }
+
+    /*
+    const infoField = new InfoField({
+        title: "",
+        infoText: "",
+        required: true,
+        x: 100,
+        y: 100
+    });
+
+     */
 
     class PictureField extends BaseField {
 
         constructor(options){
-            super({...options, type: "picture", title: "Bild" });
-            this.createPictureInput()
+            super({...options, type: "picture"});
+            this.createPictureInput();
         }
 
         createPictureInput() {
@@ -797,7 +836,7 @@
             // Input
             const input = document.createElement("input");
             input.type = "file";
-            input.accept = "image/*"
+            input.accept = "image/*";
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
 
@@ -806,10 +845,20 @@
             wrapper.appendChild(input);
             this.bodyEl.appendChild(wrapper);
         }
-
     }
 
-      class NumberField extends BaseField {
+    /*
+    const pictureField = new PictureField({
+        title: "",
+        infoText: "",
+        required: true,
+        x: 100,
+        y: 100
+    });
+
+     */
+
+    class NumberField extends BaseField {
 
         constructor(options){
             super({...options, type: "number"});
@@ -838,6 +887,15 @@
             this.bodyEl.appendChild(wrapper);
         }
     }
+    /*
+    const numberField = new NumberField({
+        infoText: "",
+        required: true,
+        x: 100,
+        y: 100
+    });
+
+     */
    
   </script>
 </body>
