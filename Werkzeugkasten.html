@@ -190,14 +190,7 @@
               <button id="exportBtn">Exportieren</button>
           </div>
       </div>
-
-        <div class="dropdown">
-            <button class="dropbtn" id="importBtn">Import</button>
-            <div class="dropdown-content">
-                <input id="importFile" type="file" accept="*/*" style="width: 100%; box-sizing: border-box;">
-            </div>
-        </div>
-
+        <input id="importFile" type="file" accept="*/*" style="width: 25%; box-sizing: border-box;">
     </div>
 
 
@@ -1229,19 +1222,24 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function render(formType = "form"){
+      function render(givenSpecs = null, formType = "form") {
           let container = document.getElementById("form-builder");
           container.innerHTML = "";
 
-          let formSpecs = specs[formType]["fields"];
-          console.log(formSpecs);
-          console.log(formSpecs.length);
+          let formSpecs = givenSpecs[formType]["fields"]
+          if(givenSpecs === null) {
+              formSpecs = specs[formType]["fields"];
+          }
+
           for(let i = 0; i < formSpecs.length; i++){
               console.log("started"+i+". time looping");
               renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
               console.log("created a "+formSpecs[i]["class"]);
               console.log("finished "+i+". time looping");
           }
+
+          if(givenSpecs !== null)
+              specs = givenSpecs;
       }
 
       function renderField(type, args){
@@ -1380,14 +1378,9 @@ formBuilder.addEventListener('drop', (e) => {
           if(file){
               let reader = new FileReader();
               reader.readAsText(file, "UTF-8");
-              reader.onload = function(evt){
-                  console.log("loading...")
-                  console.log(evt.target.result);
-                  js = JSON.parse(evt.target.result);
-                  console.log("loaded:")
-                  console.log(js);
-                  loadJson(js);
-                  render();
+              reader.onloadend = function(evt){
+                  let loadedSpecs = JSON.parse(evt.target.result);
+                  render(loadedSpecs);
               }
           }
       }
@@ -1432,15 +1425,6 @@ formBuilder.addEventListener('drop', (e) => {
 
       function createZip(json, files){
 
-      }
-
-      function loadJson(json){
-          if(json != null){
-              specs = json;
-          }
-          else {
-              // Todo display error
-          }
       }
 
       class Obj{
@@ -1513,7 +1497,7 @@ formBuilder.addEventListener('drop', (e) => {
       }
       document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
       document.getElementById("exportBtn").onclick = function() {exportBuilder()};
-      document.getElementById("importBtn").onclick = function() {
+      document.getElementById("importFile").onchange = function() {
           importBuilder();
           document.getElementById("importFile").value = "";
       };
