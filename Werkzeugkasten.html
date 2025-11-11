@@ -1350,7 +1350,6 @@ formBuilder.addEventListener('drop', (e) => {
           let fields = specs[formType]["fields"];
           moveField(field, fields.length-1);
           fields.pop();
-          render();
       }
 
   </script>
@@ -1384,7 +1383,10 @@ formBuilder.addEventListener('drop', (e) => {
               reader.onload = function(evt){
                   console.log("loading...")
                   console.log(evt.target.result);
-                  loadJson(JSON.parse(evt.target.result));
+                  js = JSON.parse(evt.target.result);
+                  console.log("loaded:")
+                  console.log(js);
+                  loadJson(js);
                   render();
               }
           }
