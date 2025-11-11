@@ -161,7 +161,7 @@
           <button onclick="addNumberField()">Zahlen</button>
           <button onclick="addDateField()">Datum</button>
           <button onclick="addPictureField()">Bild</button>
-          <button onclick="">Datei</button>
+          <button onclick="addPictureField()">Datei</button>
           <button onclick="addDropdownField()">Dropdown</button>
           <button onclick="addMultipleChoiceField()">Mehrfachauswahl</button>
       </div>
@@ -190,8 +190,8 @@
         this.title = options.title || "";       // intern gespeichert
         this.infoText = options.infoText || "";     
         this.required = !!options.required;
-        this.x = options.x || 50;
-        this.y = options.y || 50;
+        this.x = options.x || 0;
+        this.y = options.y || 0;
 
         this.createDOM();
         this.initDrag();
@@ -950,6 +950,85 @@
       }
     }
 
+// Funktionen zum Erstellen der verschiedenen Feldtypen mit versetzten Positionen
+let fieldOffsetCounter = 0;
+
+function addTextField() {
+    new Textfield({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
+
+function addInfoField() {
+    new InfoField({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
+
+function addNumberField() {
+    new NumberField({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
+
+function addDateField() {
+    new DateField({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
+
+function addPictureField() {
+    new PictureField({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
+
+function addDropdownField() {
+    new DropDownfield({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
+
+function addMultipleChoiceField() {
+    new Radio_MultipleChoicefield({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: 0 + (fieldOffsetCounter * 30)
+    });
+    fieldOffsetCounter++;
+}
   </script>
   <script>
       // script for updating and saving
