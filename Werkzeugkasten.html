@@ -163,10 +163,6 @@
         height: 100%;
         width: 100%;
     }
-
-    .move-btn {
-        height: 100%;
-    }
   </style>
 </head>
 <body>
@@ -230,9 +226,9 @@
         const container = document.getElementById("form-builder");
 
         this.el = document.createElement("div");
-        this.el.className = "field";
-        this.el.style.left = this.x + "px";
-        this.el.style.top = this.y + "px";
+        this.el.className = "field"; //weißt eine CSS-Klasse für Styling zu
+        this.el.style.left = this.x + "px"; //Position X
+        this.el.style.top = this.y + "px"; //Position Y
         this.el.id = String(this.instanceId)
 
         // Header
@@ -246,28 +242,6 @@
           titleSpan.setAttribute("data-info", this.infoText);
         }
         this.titleEl = titleSpan;
-
-        const centerHeader = document.createElement("div");
-        centerHeader.className = "move-buttons";
-
-        const btnUp = document.createElement("button");
-        btnUp.className = "move-btn";
-        btnUp.textContent = "^"
-        const field = this.el;
-        const parent = this
-        btnUp.onclick = function () {
-            container.insertBefore(field, field.previousElementSibling);
-            parent.repositionAllFields();
-        };
-
-        const btnDown = document.createElement("button");
-        btnDown.className = "move-btn";
-        btnDown.textContent = "v"
-        btnDown.onclick = function () {
-            console.log(field);
-            container.insertBefore(field.nextElementSibling, field);
-            parent.repositionAllFields()
-        }
 
         const rightHeader = document.createElement("div");
         rightHeader.className = "field-required";
@@ -316,16 +290,14 @@
 
         rightHeader.appendChild(btnUp);
         rightHeader.appendChild(btnDown);
+        //Checkbox, Label & Sternchen werden in "rechten Teil" hinzugefügt
         rightHeader.appendChild(cb);
         rightHeader.appendChild(cbLabel);
         rightHeader.appendChild(reqIndicator);
         rightHeader.appendChild(deleteBtn);
 
-        //centerHeader.appendChild(btnUp);
-        //centerHeader.appendChild(btnDown);
-
+        //Header wird um den "rechten Teil" (Label, Checkbox, Stern) ergänzt
         header.appendChild(titleSpan);
-        header.appendChild(centerHeader)
         header.appendChild(rightHeader);
 
         const body = document.createElement("div");
