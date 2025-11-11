@@ -2,187 +2,83 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Oberklasse-Feld (Basisversion)</title>
+  <title>Form Builder</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    #form-builder {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #f0f0f0;
-    }
-
-    .field {
-      position: absolute;
-      top: 50px;
-      left: 50px;
-      width: 360px;
-      background: #ffffff;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-
-    .field-header {
-      cursor: move;
-      background: #007bff;
-      color: #fff;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-radius: 6px 6px 0 0;
-    }
-
-    .field-title {
-      font-size: 14px;
-      font-weight: bold;
-      position: relative;
-    }
-
-    /* Tooltip */
-    .field-title[data-info]:hover::after {
-      content: attr(data-info);
-      position: absolute;
-      left: 0;
-      top: 130%;
-      background: #333;
-      color: #fff;
-      padding: 6px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-
-    .field-required {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-    }
-
-    .field-body {
-      padding: 8px 10px 10px;
-    }
-
-    .field-required-indicator {
-      color: #ffeb3b;
-      margin-left: 4px;
-      font-size: 14px;
-    }
-
-    /* Konfiguration (Titel & Zusatzinfo) */
-    .field-config {
-      margin-bottom: 8px;
-      padding: 6px;
-      background: #f5f5f5;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 12px;
-    }
-
-    .field-config label {
-      display: block;
-      margin-bottom: 3px;
-      font-weight: bold;
-    }
-
-    .field-config input[type="text"],
-    .field-config textarea {
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 12px;
-      padding: 4px;
-      border-radius: 3px;
-      border: 1px solid #ccc;
-      margin-bottom: 6px;
-      resize: vertical;
-    }
+    body { font-family: Arial, sans-serif; height: 100vh; margin: 0; overflow: hidden; }
+    #form-builder { position: relative; width: 100%; height: 100%; background: #f0f0f0; }
+    .field { position: absolute; top: 50px; left: 50px; width: 360px; background: #fff; 
+             border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing: border-box; }
+    .field-header { cursor: move; background: #007bff; color: #fff; padding: 8px 10px; display: flex; 
+                    align-items: center; justify-content: space-between; border-radius: 6px 6px 0 0; }
+    .field-title { font-size: 14px; font-weight: bold; position: relative; }
+    .field-title[data-info]:hover::after { content: attr(data-info); position: absolute; left: 0; top: 130%; 
+                                           background: #333; color: #fff; padding: 6px 8px; border-radius: 4px; 
+                                           font-size: 12px; white-space: nowrap; z-index: 10; }
+    .field-required { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+    .field-body { padding: 8px 10px 10px; }
+    .field-required-indicator { color: #ffeb3b; margin-left: 4px; font-size: 14px; }
+    .field-config { margin-bottom: 8px; padding: 6px; background: #f5f5f5; border-radius: 4px; 
+                    border: 1px solid #ddd; font-size: 12px; }
+    .field-config label { display: block; margin-bottom: 3px; font-weight: bold; }
+    .field-config input[type="text"], .field-config textarea { width: 100%; box-sizing: border-box; 
+                                                                font-size: 12px; padding: 4px; border-radius: 3px; 
+                                                                border: 1px solid #ccc; margin-bottom: 6px; resize: vertical; }
   </style>
 </head>
 <body>
   <div id="form-builder"></div>
-
   <script>
-    // ===== Oberklasse: BaseField =====
     class BaseField {
-      static instanceCounter = 0;  // Statische Variable für alle Instanzen
+      static instanceCounter = 0;
 
       constructor(options) {
-        BaseField.instanceCounter++;  // Erhöhe Zähler bei jeder neuen Instanz
-        this.instanceId = BaseField.instanceCounter;  // Speichere aktuelle Nummer in der Instanz
-        
-        this.type = options.type || "base";         
-        this.title = options.title || "";       // intern gespeichert
-        this.infoText = options.infoText || "";     
+        this.instanceId = ++BaseField.instanceCounter;
+        this.type = options.type || "base";
+        this.title = options.title || "";
+        this.infoText = options.infoText || "";
         this.required = !!options.required;
         this.x = options.x || 50;
         this.y = options.y || 50;
-
         this.createDOM();
         this.initDrag();
         this.initRequiredCheckbox();
-        this.initConfigUI(); // Titel + Zusatzinfo editierbar
+        this.initConfigUI();
       }
 
       createDOM() {
-        const container = document.getElementById("form-builder");
+        this.el = this.createElement("div", "field");
+        Object.assign(this.el.style, { left: this.x + "px", top: this.y + "px" });
 
-        this.el = document.createElement("div");
-        this.el.className = "field";
-        this.el.style.left = this.x + "px";
-        this.el.style.top = this.y + "px";
+        const header = this.createElement("div", "field-header");
+        this.titleEl = this.createElement("span", "field-title", "Feld");
+        if (this.infoText) this.titleEl.setAttribute("data-info", this.infoText);
 
-        // Header
-        const header = document.createElement("div");
-        header.className = "field-header";
+        const rightHeader = this.createElement("div", "field-required");
+        this.requiredCheckbox = this.createInput("checkbox", this.required);
+        const cbLabel = this.createElement("span", null, "Pflicht");
+        this.requiredIndicator = this.createElement("span", "field-required-indicator", this.required ? "*" : "");
 
-        const titleSpan = document.createElement("span");
-        titleSpan.className = "field-title";
-        titleSpan.textContent = "Feld"; // Anzeige bleibt immer gleich
-        if (this.infoText) {
-          titleSpan.setAttribute("data-info", this.infoText);
-        }
-        this.titleEl = titleSpan;
+        rightHeader.append(this.requiredCheckbox, cbLabel, this.requiredIndicator);
+        header.append(this.titleEl, rightHeader);
 
-        const rightHeader = document.createElement("div");
-        rightHeader.className = "field-required";
+        this.bodyEl = this.createElement("div", "field-body");
+        this.el.append(header, this.bodyEl);
+        document.getElementById("form-builder").appendChild(this.el);
+      }
 
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = this.required;
-        this.requiredCheckbox = cb;
+      createElement(tag, className, text) {
+        const el = document.createElement(tag);
+        if (className) el.className = className;
+        if (text) el.textContent = text;
+        return el;
+      }
 
-        const cbLabel = document.createElement("span");
-        cbLabel.textContent = "Pflicht";
-
-        const reqIndicator = document.createElement("span");
-        reqIndicator.className = "field-required-indicator";
-        reqIndicator.textContent = this.required ? "*" : "";
-        this.requiredIndicator = reqIndicator;
-
-        rightHeader.appendChild(cb);
-        rightHeader.appendChild(cbLabel);
-        rightHeader.appendChild(reqIndicator);
-
-        header.appendChild(titleSpan);
-        header.appendChild(rightHeader);
-
-        const body = document.createElement("div");
-        body.className = "field-body";
-        this.bodyEl = body;
-
-        this.el.appendChild(header);
-        this.el.appendChild(body);
-        container.appendChild(this.el);
+      createInput(type, value) {
+        const input = document.createElement("input");
+        input.type = type;
+        if (type === "checkbox") input.checked = value;
+        else if (value) input.value = value;
+        return input;
       }
 
       initRequiredCheckbox() {
@@ -192,76 +88,35 @@
         });
       }
 
-      // Titel + Zusatzinfo editierbar (intern gespeichert)
       initConfigUI() {
-        const config = document.createElement("div");
-        config.className = "field-config";
+        const config = this.createElement("div", "field-config");
+        const titleLabel = this.createElement("label", null, "Titel");
+        const titleInput = this.createInput("text", this.title);
+        titleInput.addEventListener("input", () => this.title = titleInput.value);
 
-        // Titel (intern gespeichert, nicht sichtbar im Header)
-        const titleLabel = document.createElement("label");
-        titleLabel.textContent = "Titel";
-
-        const titleInput = document.createElement("input");
-        titleInput.type = "text";
-        titleInput.value = this.title;
-
-        titleInput.addEventListener("input", () => {
-          this.title = titleInput.value;
-        });
-
-        // Zusatzinfo (Tooltip)
-        const infoLabel = document.createElement("label");
-        infoLabel.textContent = "Zusatzinfo";
-
+        const infoLabel = this.createElement("label", null, "Zusatzinfo");
         const infoInput = document.createElement("textarea");
         infoInput.rows = 2;
         infoInput.value = this.infoText;
-
         infoInput.addEventListener("input", () => {
           this.infoText = infoInput.value;
-          if (this.infoText.trim()) {
-            this.titleEl.setAttribute("data-info", this.infoText);
-          } else {
-            this.titleEl.removeAttribute("data-info");
-          }
+          this.infoText.trim() ? this.titleEl.setAttribute("data-info", this.infoText) : this.titleEl.removeAttribute("data-info");
         });
 
-        config.appendChild(titleLabel);
-        config.appendChild(titleInput);
-        config.appendChild(infoLabel);
-        config.appendChild(infoInput);
-
+        config.append(titleLabel, titleInput, infoLabel, infoInput);
         this.bodyEl.appendChild(config);
       }
 
       initDrag() {
         const header = this.el.querySelector(".field-header");
-        let offsetX = 0;
-        let offsetY = 0;
-        let isDragging = false;
-
-        header.addEventListener("mousedown", (e) => {
-          isDragging = true;
-          const rect = this.el.getBoundingClientRect();
-          offsetX = e.clientX - rect.left;
-          offsetY = e.clientY - rect.top;
-
-          document.addEventListener("mousemove", onMouseMove);
-          document.addEventListener("mouseup", onMouseUp);
-        });
+        let offsetX = 0, offsetY = 0, isDragging = false;
 
         const onMouseMove = (e) => {
           if (!isDragging) return;
           const parentRect = this.el.parentElement.getBoundingClientRect();
-          let x = e.clientX - parentRect.left - offsetX;
-          let y = e.clientY - parentRect.top - offsetY;
-
-          // Begrenzung im Container
-          x = Math.max(0, Math.min(parentRect.width - this.el.offsetWidth, x));
-          y = Math.max(0, Math.min(parentRect.height - this.el.offsetHeight, y));
-
-          this.el.style.left = x + "px";
-          this.el.style.top = y + "px";
+          let x = Math.max(0, Math.min(parentRect.width - this.el.offsetWidth, e.clientX - parentRect.left - offsetX));
+          let y = Math.max(0, Math.min(parentRect.height - this.el.offsetHeight, e.clientY - parentRect.top - offsetY));
+          Object.assign(this.el.style, { left: x + "px", top: y + "px" });
         };
 
         const onMouseUp = () => {
@@ -269,51 +124,83 @@
           document.removeEventListener("mousemove", onMouseMove);
           document.removeEventListener("mouseup", onMouseUp);
         };
+
+        header.addEventListener("mousedown", (e) => {
+          isDragging = true;
+          const rect = this.el.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          document.addEventListener("mousemove", onMouseMove);
+          document.addEventListener("mouseup", onMouseUp);
+        });
       }
 
-      // Für spätere HTML-Erzeugung vorbereiten
       toConfigObject() {
         const rect = this.el.getBoundingClientRect();
         const parentRect = this.el.parentElement.getBoundingClientRect();
         return {
-          type: this.type,
-          title: this.title,         // gespeicherter individueller Titel
-          infoText: this.infoText,   // gespeicherter Tooltip
-          required: this.required,
-          x: rect.left - parentRect.left,
-          y: rect.top - parentRect.top
+          type: this.type, title: this.title, infoText: this.infoText, required: this.required,
+          x: rect.left - parentRect.left, y: rect.top - parentRect.top
         };
       }
+
+      createLabeledInput(labelText, inputType, extra = {}) {
+        const wrapper = document.createElement("div");
+        const label = this.createElement("label", null, labelText);
+        Object.assign(label.style, { display: "block", marginBottom: "4px", fontSize: "12px" });
+        
+        const input = document.createElement(inputType === "textarea" ? "textarea" : "input");
+        if (inputType !== "textarea") input.type = inputType;
+        Object.assign(input.style, { width: "100%", boxSizing: "border-box" });
+        Object.assign(input, extra);
+        
+        wrapper.append(label, input);
+        this.bodyEl.appendChild(wrapper);
+        return input;
+      }
     }
-    // Hinweis: toConfigObject() liefert später alle wichtigen Daten für HTML-Generierung
 
     class Textfield extends BaseField {
       constructor(options) {
         super({ ...options, type: "text" });
-        this.createTextInput();
+        this.createLabeledInput("Text", "text");
         this.titleEl.textContent = "Textfeld";
       }
+    }
 
-      createTextInput() {
-        const wrapper = document.createElement("div");
-        
-        // Label hinzufügen
-        const label = document.createElement("label");
-        label.textContent = "Text";
-        label.style.display = "block";
-        label.style.marginBottom = "4px";
-        label.style.fontSize = "12px";
-        
-        // Input erstellen
-        const input = document.createElement("input");
-        input.type = "text";
-        input.style.width = "100%";
-        input.style.boxSizing = "border-box";
-        
-        // Alles zusammenfügen
-        wrapper.appendChild(label);
-        wrapper.appendChild(input);
-        this.bodyEl.appendChild(wrapper);
+    class DateField extends BaseField {
+      constructor(options) {
+        super({ ...options, type: "date" });
+        this.createLabeledInput("Datum Feld", "date");
+        this.titleEl.textContent = "Datumsfeld";
+      }
+    }
+
+    class NumberField extends BaseField {
+      constructor(options) {
+        super({ ...options, type: "number" });
+        this.createLabeledInput("Nummer Feld", "number");
+        this.titleEl.textContent = "Zahlenfeld";
+      }
+    }
+
+    class InfoField extends BaseField {
+      constructor(options) {
+        super({ ...options, type: "info", required: false });
+        this.inputEl = this.createLabeledInput("Info Feld", "textarea", { rows: 2 });
+        this.titleEl.textContent = "Infofeld";
+      }
+
+      toConfigObject() {
+        return { ...super.toConfigObject(), content: this.inputEl.value };
+      }
+    }
+
+    class PictureField extends BaseField {
+      constructor(options) {
+        super({ ...options, type: "picture" });
+        this.createLabeledInput("Bild Feld", "file", { accept: "image/*" });
+        this.titleEl.textContent = "Bildfeld";
       }
     }
 
@@ -327,161 +214,98 @@
 
       createSelectInput() {
         const wrapper = document.createElement("div");
-        
-        // Label für das Dropdown
-        const label = document.createElement("label");
-        label.textContent = "Optionen";
-        label.style.display = "block";
-        label.style.marginBottom = "4px";
-        label.style.fontSize = "12px";
+        const label = this.createElement("label", null, "Optionen");
+        Object.assign(label.style, { display: "block", marginBottom: "4px", fontSize: "12px" });
 
-        // Container für Input und Button
-        const inputContainer = document.createElement("div");
-        inputContainer.style.display = "flex";
-        inputContainer.style.marginBottom = "10px";
-        inputContainer.style.gap = "5px";
+        const { input, button, container } = this.createInputRow("Neue Option eingeben", "Hinzufügen");
+        this.optionsContainer = document.createElement("div");
+        Object.assign(this.optionsContainer.style, { maxHeight: "150px", overflowY: "auto", padding: "4px" });
 
-        // Textfeld für neue Optionen
-        const input = document.createElement("input");
-        input.type = "text";
-        input.style.flex = "1";
-        input.placeholder = "Neue Option eingeben";
+        const addOption = () => {
+          if (input.value.trim()) {
+            this.addOption(input.value.trim());
+            input.value = "";
+          }
+        };
 
-        // Hinzufügen Button
-        const addButton = document.createElement("button");
-        addButton.textContent = "Hinzufügen";
-        addButton.style.padding = "4px 8px";
+        button.addEventListener("click", addOption);
+        input.addEventListener("keypress", (e) => e.key === "Enter" && addOption());
 
-        // Styling für drag & drop hinzufügen
-        const optionsContainer = document.createElement("div");
-        optionsContainer.style.maxHeight = "150px";
-        optionsContainer.style.overflowY = "auto";
-        optionsContainer.style.padding = "4px";
-        
-        // Event Listener für das Hinzufügen
-        addButton.addEventListener("click", () => {
-            if (input.value.trim()) {
-                this.addOption(input.value.trim());
-                input.value = "";
-            }
-        });
-
-        // Enter-Taste auch zum Hinzufügen nutzen
-        input.addEventListener("keypress", (e) => {
-            if (e.key === "Enter" && input.value.trim()) {
-                this.addOption(input.value.trim());
-                input.value = "";
-            }
-        });
-
-        inputContainer.appendChild(input);
-        inputContainer.appendChild(addButton);
-        
-        wrapper.appendChild(label);
-        wrapper.appendChild(inputContainer);
-        wrapper.appendChild(optionsContainer);
-        
-        this.optionsContainer = optionsContainer;
+        wrapper.append(label, container, this.optionsContainer);
         this.bodyEl.appendChild(wrapper);
+      }
+
+      createInputRow(placeholder, buttonText) {
+        const container = document.createElement("div");
+        Object.assign(container.style, { display: "flex", marginBottom: "10px", gap: "5px" });
+        
+        const input = this.createInput("text");
+        input.style.flex = "1";
+        input.placeholder = placeholder;
+        
+        const button = this.createElement("button", null, buttonText);
+        button.style.padding = "4px 8px";
+        
+        container.append(input, button);
+        return { input, button, container };
       }
 
       addOption(text) {
         const optionDiv = document.createElement("div");
-        optionDiv.style.display = "flex";
-        optionDiv.style.justifyContent = "space-between";
-        optionDiv.style.alignItems = "center";
-        optionDiv.style.padding = "4px";
-        optionDiv.style.marginBottom = "4px";
-        optionDiv.style.backgroundColor = "#f5f5f5";
-        optionDiv.style.borderRadius = "4px";
-        optionDiv.style.cursor = "move"; // Cursor für Drag & Drop
-        
-        // Drag & Drop Attribute
+        Object.assign(optionDiv.style, {
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "4px", marginBottom: "4px", backgroundColor: "#f5f5f5",
+          borderRadius: "4px", cursor: "move"
+        });
         optionDiv.draggable = true;
-        
-        // Drag & Drop Event Listener
-        optionDiv.addEventListener('dragstart', (e) => {
-            e.target.classList.add('dragging');
-            e.target.style.opacity = '0.5';
+
+        const optionText = this.createElement("span", null, text);
+        Object.assign(optionText.style, { fontSize: "12px", pointerEvents: "none" });
+
+        const deleteButton = this.createDeleteButton(() => {
+          optionDiv.remove();
+          this.updateOptions();
         });
 
-        optionDiv.addEventListener('dragend', (e) => {
-            e.target.classList.remove('dragging');
-            e.target.style.opacity = '1';
-            this.updateOptions();
-        });
-
-        optionDiv.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            const draggingItem = this.optionsContainer.querySelector('.dragging');
-            const siblings = [...this.optionsContainer.querySelectorAll('div:not(.dragging)')];
-            const nextSibling = siblings.find(sibling => {
-                const box = sibling.getBoundingClientRect();
-                const offset = e.clientY - box.top - box.height / 2;
-                return offset < 0;
-            });
-            
-            if (nextSibling) {
-                this.optionsContainer.insertBefore(draggingItem, nextSibling);
-            } else {
-                this.optionsContainer.appendChild(draggingItem);
-            }
-        });
-
-        // Highlight beim Draggen
-        optionDiv.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            optionDiv.style.borderTop = '2px solid #007bff';
-        });
-
-        optionDiv.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            optionDiv.style.borderTop = 'none';
-        });
-
-        optionDiv.addEventListener('drop', (e) => {
-            e.preventDefault();
-            optionDiv.style.borderTop = 'none';
-        });
-
-        const optionText = document.createElement("span");
-        optionText.textContent = text;
-        optionText.style.fontSize = "12px";
-        optionText.style.pointerEvents = "none"; // Verhindert Störungen beim Drag & Drop
-
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "×";
-        deleteButton.style.padding = "2px 6px";
-        deleteButton.style.backgroundColor = "#ff4444";
-        deleteButton.style.color = "white";
-        deleteButton.style.border = "none";
-        deleteButton.style.borderRadius = "3px";
-        deleteButton.style.cursor = "pointer";
-
-        deleteButton.addEventListener("click", () => {
-            optionDiv.remove();
-            this.updateOptions();
-        });
-
-        optionDiv.appendChild(optionText);
-        optionDiv.appendChild(deleteButton);
+        this.addDragListeners(optionDiv);
+        optionDiv.append(optionText, deleteButton);
         this.optionsContainer.appendChild(optionDiv);
-        
         this.updateOptions();
       }
 
+      createDeleteButton(onClick) {
+        const button = this.createElement("button", null, "×");
+        Object.assign(button.style, {
+          padding: "2px 6px", backgroundColor: "#ff4444", color: "white",
+          border: "none", borderRadius: "3px", cursor: "pointer"
+        });
+        button.addEventListener("click", onClick);
+        return button;
+      }
+
+      addDragListeners(el) {
+        const setBorder = (show) => el.style.borderTop = show ? "2px solid #007bff" : "none";
+
+        el.addEventListener('dragstart', () => { el.classList.add('dragging'); el.style.opacity = '0.5'; });
+        el.addEventListener('dragend', () => { el.classList.remove('dragging'); el.style.opacity = '1'; this.updateOptions(); });
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          const dragging = this.optionsContainer.querySelector('.dragging');
+          const siblings = [...this.optionsContainer.querySelectorAll('div:not(.dragging)')];
+          const next = siblings.find(s => e.clientY - s.getBoundingClientRect().top - s.offsetHeight / 2 < 0);
+          this.optionsContainer.insertBefore(dragging, next || null);
+        });
+        el.addEventListener('dragenter', (e) => { e.preventDefault(); setBorder(true); });
+        el.addEventListener('dragleave', (e) => { e.preventDefault(); setBorder(false); });
+        el.addEventListener('drop', (e) => { e.preventDefault(); setBorder(false); });
+      }
+
       updateOptions() {
-        // Aktualisiert das Array mit allen Optionen
-        this.options = Array.from(this.optionsContainer.querySelectorAll("span"))
-            .map(span => span.textContent);
+        this.options = Array.from(this.optionsContainer.querySelectorAll("span")).map(s => s.textContent);
       }
 
       toConfigObject() {
-        const baseConfig = super.toConfigObject();
-        return {
-            ...baseConfig,
-            options: this.options
-        };
+        return { ...super.toConfigObject(), options: this.options };
       }
     }
 
@@ -489,7 +313,7 @@
       constructor(options) {
         super({ ...options, type: "radio_multiple" });
         this.options = [];
-        this.allowMultiple = false; // Standard: Radio (Einfachauswahl)
+        this.allowMultiple = false;
         this.createOptionsInput();
         this.titleEl.textContent = "Radio-/Multiple-Choice-Feld";
       }
@@ -497,406 +321,137 @@
       createOptionsInput() {
         const wrapper = document.createElement("div");
         
-        // Checkbox für Mehrfachauswahl
-        const multipleChoiceContainer = document.createElement("div");
-        multipleChoiceContainer.style.marginBottom = "10px";
-        
-        const multipleChoice = document.createElement("input");
-        multipleChoice.type = "checkbox";
-        multipleChoice.id = "multipleChoice_" + this.instanceId;
-        multipleChoice.checked = this.allowMultiple;
-        
-        const multipleChoiceLabel = document.createElement("label");
-        multipleChoiceLabel.htmlFor = "multipleChoice_" + this.instanceId;
-        multipleChoiceLabel.textContent = "Mehrfachauswahl erlauben";
-        multipleChoiceLabel.style.fontSize = "12px";
-        multipleChoiceLabel.style.marginLeft = "5px";
-
-        multipleChoice.addEventListener("change", () => {
-            this.allowMultiple = multipleChoice.checked;
-            this.updateOptionsPreview();
+        const multipleChoice = this.createCheckbox("Mehrfachauswahl erlauben", this.allowMultiple, (checked) => {
+          this.allowMultiple = checked;
+          this.updateOptionsPreview();
         });
-
-        multipleChoiceContainer.appendChild(multipleChoice);
-        multipleChoiceContainer.appendChild(multipleChoiceLabel);
         
-        // Label für die Optionen
-        const label = document.createElement("label");
-        label.textContent = "Auswahlmöglichkeiten";
-        label.style.display = "block";
-        label.style.marginBottom = "4px";
-        label.style.fontSize = "12px";
+        const label = this.createElement("label", null, "Auswahlmöglichkeiten");
+        Object.assign(label.style, { display: "block", marginBottom: "4px", fontSize: "12px" });
 
-        // Container für Input und Button
-        const inputContainer = document.createElement("div");
-        inputContainer.style.display = "flex";
-        inputContainer.style.marginBottom = "10px";
-        inputContainer.style.gap = "5px";
+        const { input, button, container } = this.createInputRow("Neue Auswahlmöglichkeit eingeben", "Hinzufügen");
+        this.optionsContainer = document.createElement("div");
+        Object.assign(this.optionsContainer.style, { maxHeight: "150px", overflowY: "auto", padding: "4px" });
 
-        // Textfeld für neue Optionen
-        const input = document.createElement("input");
-        input.type = "text";
-        input.style.flex = "1";
-        input.placeholder = "Neue Auswahlmöglichkeit eingeben";
+        const addOption = () => {
+          if (input.value.trim()) {
+            this.addOption(input.value.trim());
+            input.value = "";
+          }
+        };
 
-        // Hinzufügen Button
-        const addButton = document.createElement("button");
-        addButton.textContent = "Hinzufügen";
-        addButton.style.padding = "4px 8px";
+        button.addEventListener("click", addOption);
+        input.addEventListener("keypress", (e) => e.key === "Enter" && addOption());
 
-        // Container für die Optionsliste
-        const optionsContainer = document.createElement("div");
-        optionsContainer.style.maxHeight = "150px";
-        optionsContainer.style.overflowY = "auto";
-        optionsContainer.style.padding = "4px";
-
-        // Event Listener für das Hinzufügen
-        addButton.addEventListener("click", () => {
-            if (input.value.trim()) {
-                this.addOption(input.value.trim());
-                input.value = "";
-            }
-        });
-
-        // Enter-Taste auch zum Hinzufügen nutzen
-        input.addEventListener("keypress", (e) => {
-            if (e.key === "Enter" && input.value.trim()) {
-                this.addOption(input.value.trim());
-                input.value = "";
-            }
-        });
-
-        wrapper.appendChild(multipleChoiceContainer);
-        wrapper.appendChild(label);
-        inputContainer.appendChild(input);
-        inputContainer.appendChild(addButton);
-        wrapper.appendChild(inputContainer);
-        wrapper.appendChild(optionsContainer);
-        
-        this.optionsContainer = optionsContainer;
+        wrapper.append(multipleChoice, label, container, this.optionsContainer);
         this.bodyEl.appendChild(wrapper);
+      }
+
+      createCheckbox(text, checked, onChange) {
+        const container = document.createElement("div");
+        container.style.marginBottom = "10px";
+        
+        const cb = this.createInput("checkbox", checked);
+        cb.id = "multipleChoice_" + this.instanceId;
+        cb.addEventListener("change", () => onChange(cb.checked));
+        
+        const label = this.createElement("label", null, text);
+        label.htmlFor = cb.id;
+        Object.assign(label.style, { fontSize: "12px", marginLeft: "5px" });
+        
+        container.append(cb, label);
+        return container;
+      }
+
+      createInputRow(placeholder, buttonText) {
+        const container = document.createElement("div");
+        Object.assign(container.style, { display: "flex", marginBottom: "10px", gap: "5px" });
+        
+        const input = this.createInput("text");
+        input.style.flex = "1";
+        input.placeholder = placeholder;
+        
+        const button = this.createElement("button", null, buttonText);
+        button.style.padding = "4px 8px";
+        
+        container.append(input, button);
+        return { input, button, container };
       }
 
       addOption(text) {
         const optionDiv = document.createElement("div");
-        optionDiv.style.display = "flex";
-        optionDiv.style.justifyContent = "space-between";
-        optionDiv.style.alignItems = "center";
-        optionDiv.style.padding = "4px";
-        optionDiv.style.marginBottom = "4px";
-        optionDiv.style.backgroundColor = "#f5f5f5";
-        optionDiv.style.borderRadius = "4px";
-        optionDiv.style.cursor = "move";
-        
+        Object.assign(optionDiv.style, {
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "4px", marginBottom: "4px", backgroundColor: "#f5f5f5",
+          borderRadius: "4px", cursor: "move"
+        });
         optionDiv.draggable = true;
-        
-        // Radio/Checkbox Vorschau
-        const inputPreview = document.createElement("input");
-        inputPreview.type = this.allowMultiple ? "checkbox" : "radio";
+
+        const inputPreview = this.createInput(this.allowMultiple ? "checkbox" : "radio");
         inputPreview.name = "preview_" + this.instanceId;
-        inputPreview.style.marginRight = "8px";
-        inputPreview.style.cursor = "default";
+        Object.assign(inputPreview.style, { marginRight: "8px", cursor: "default" });
         inputPreview.onclick = (e) => e.preventDefault();
 
-        const optionText = document.createElement("span");
-        optionText.textContent = text;
-        optionText.style.fontSize = "12px";
-        optionText.style.flex = "1";
-        optionText.style.pointerEvents = "none";
+        const optionText = this.createElement("span", null, text);
+        Object.assign(optionText.style, { fontSize: "12px", flex: "1", pointerEvents: "none" });
 
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "×";
-        deleteButton.style.padding = "2px 6px";
-        deleteButton.style.backgroundColor = "#ff4444";
-        deleteButton.style.color = "white";
-        deleteButton.style.border = "none";
-        deleteButton.style.borderRadius = "3px";
-        deleteButton.style.cursor = "pointer";
-        deleteButton.style.marginLeft = "8px";
-
-        // Drag & Drop Event Listener
-        this.addDragListeners(optionDiv);
-
-        deleteButton.addEventListener("click", () => {
-            optionDiv.remove();
-            this.updateOptions();
+        const deleteButton = this.createDeleteButton(() => {
+          optionDiv.remove();
+          this.updateOptions();
         });
 
         const textContainer = document.createElement("div");
-        textContainer.style.display = "flex";
-        textContainer.style.alignItems = "center";
-        textContainer.style.flex = "1";
-        textContainer.appendChild(inputPreview);
-        textContainer.appendChild(optionText);
+        Object.assign(textContainer.style, { display: "flex", alignItems: "center", flex: "1" });
+        textContainer.append(inputPreview, optionText);
 
-        optionDiv.appendChild(textContainer);
-        optionDiv.appendChild(deleteButton);
+        this.addDragListeners(optionDiv);
+        optionDiv.append(textContainer, deleteButton);
         this.optionsContainer.appendChild(optionDiv);
-        
         this.updateOptions();
       }
 
-      addDragListeners(optionDiv) {
-        optionDiv.addEventListener('dragstart', (e) => {
-            e.target.classList.add('dragging');
-            e.target.style.opacity = '0.5';
+      createDeleteButton(onClick) {
+        const button = this.createElement("button", null, "×");
+        Object.assign(button.style, {
+          padding: "2px 6px", backgroundColor: "#ff4444", color: "white",
+          border: "none", borderRadius: "3px", cursor: "pointer", marginLeft: "8px"
         });
+        button.addEventListener("click", onClick);
+        return button;
+      }
 
-        optionDiv.addEventListener('dragend', (e) => {
-            e.target.classList.remove('dragging');
-            e.target.style.opacity = '1';
-            this.updateOptions();
-        });
+      addDragListeners(el) {
+        const setBorder = (show) => el.style.borderTop = show ? "2px solid #007bff" : "none";
 
-        optionDiv.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            const draggingItem = this.optionsContainer.querySelector('.dragging');
-            const siblings = [...this.optionsContainer.querySelectorAll('div:not(.dragging)')];
-            const nextSibling = siblings.find(sibling => {
-                const box = sibling.getBoundingClientRect();
-                const offset = e.clientY - box.top - box.height / 2;
-                return offset < 0;
-            });
-            
-            if (nextSibling) {
-                this.optionsContainer.insertBefore(draggingItem, nextSibling);
-            } else {
-                this.optionsContainer.appendChild(draggingItem);
-            }
+        el.addEventListener('dragstart', () => { el.classList.add('dragging'); el.style.opacity = '0.5'; });
+        el.addEventListener('dragend', () => { el.classList.remove('dragging'); el.style.opacity = '1'; this.updateOptions(); });
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          const dragging = this.optionsContainer.querySelector('.dragging');
+          const siblings = [...this.optionsContainer.querySelectorAll('div:not(.dragging)')];
+          const next = siblings.find(s => e.clientY - s.getBoundingClientRect().top - s.offsetHeight / 2 < 0);
+          this.optionsContainer.insertBefore(dragging, next || null);
         });
-
-        optionDiv.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            optionDiv.style.borderTop = '2px solid #007bff';
-        });
-
-        optionDiv.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            optionDiv.style.borderTop = 'none';
-        });
-
-        optionDiv.addEventListener('drop', (e) => {
-            e.preventDefault();
-            optionDiv.style.borderTop = 'none';
-        });
+        el.addEventListener('dragenter', (e) => { e.preventDefault(); setBorder(true); });
+        el.addEventListener('dragleave', (e) => { e.preventDefault(); setBorder(false); });
+        el.addEventListener('drop', (e) => { e.preventDefault(); setBorder(false); });
       }
 
       updateOptionsPreview() {
-        const inputs = this.optionsContainer.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.type = this.allowMultiple ? "checkbox" : "radio";
+        this.optionsContainer.querySelectorAll('input').forEach(input => {
+          input.type = this.allowMultiple ? "checkbox" : "radio";
         });
       }
 
       updateOptions() {
-        this.options = Array.from(this.optionsContainer.querySelectorAll("span"))
-            .map(span => span.textContent);
+        this.options = Array.from(this.optionsContainer.querySelectorAll("span")).map(s => s.textContent);
       }
 
       toConfigObject() {
-        const baseConfig = super.toConfigObject();
-        return {
-            ...baseConfig,
-            options: this.options,
-            allowMultiple: this.allowMultiple
-        };
+        return { ...super.toConfigObject(), options: this.options, allowMultiple: this.allowMultiple };
       }
     }
 
-    // Beispiel: Erstelle ein Textfeld
-    /*
-      const textField = new Textfield({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-      });
-    */
-
-    class DateField extends BaseField {
-
-        constructor(options){
-            super({...options, type: "date"});
-            this.createDateInput()
-        }
-
-        createDateInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Datum Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("input");
-            input.type = "date";
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
-        }
-    }
-
-    /*
-    const dateField = new DateField({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });
-
-     */
-
-    // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
-    // Ist frei ziehbar, sollte auch nicht sein
-    class InfoField extends BaseField {
-
-
-
-        constructor(options){
-            super({...options, type: "info", required: false});
-            this.value
-            this.createInfoInput();
-        }
-
-        createInfoInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Info Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("textarea");
-            input.rows = 2;
-            this.value = input.value
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
-        }
-
-        toConfigObject() {
-            const rect = this.el.getBoundingClientRect();
-            const parentRect = this.el.parentElement.getBoundingClientRect();
-            return {
-                type: this.type,
-                title: this.title,         // gespeicherter individueller Titel
-                infoText: this.infoText,   // gespeicherter Tooltip
-                required: this.required,
-                content: this.value,
-                x: rect.left - parentRect.left,
-                y: rect.top - parentRect.top
-            };
-        }
-    }
-
-    /*
-    const infoField = new InfoField({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });
-
-     */
-
-    class PictureField extends BaseField {
-
-        constructor(options){
-            super({...options, type: "picture"});
-            this.createPictureInput();
-        }
-
-        createPictureInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Bild Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = "image/*";
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
-        }
-    }
-
-    /*
-    const pictureField = new PictureField({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });
-
-     */
-
-    class NumberField extends BaseField {
-
-        constructor(options){
-            super({...options, type: "number"});
-            this.createNumberInput()
-        }
-
-        createNumberInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Nummer Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("input");
-            input.type = "number";
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
-        }
-    }
-    /*
-    const numberField = new NumberField({
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });
-
-     */
-   
-  </script>
+    </script>
 </body>
 </html>
