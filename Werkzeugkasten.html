@@ -251,6 +251,18 @@
         
         deleteBtn.addEventListener("click", () => {
           this.el.remove();
+          // Repositioniere alle verbleibenden Felder nach dem Löschen
+          setTimeout(() => {
+            const container = document.getElementById("form-builder");
+            const allFields = container.querySelectorAll(".field");
+            let currentY = 0;
+            
+            allFields.forEach(field => {
+              field.style.left = "0px";
+              field.style.top = currentY + "px";
+              currentY += field.offsetHeight + 10;
+            });
+          }, 0);
         });
 
         rightHeader.appendChild(cb);
