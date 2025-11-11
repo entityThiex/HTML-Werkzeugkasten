@@ -1,18 +1,77 @@
 {
   "form": {
-    "fields": {
-      "id" : {"specs":  "", "usw": 2}
+    "vars": {
+      "id-counter": 0
     },
-    "script": {
-      "id" : {"specs":  "", "usw": 2}
-    }
+    "fields": [
+      {
+        "id" : "id0",
+        "type": "header",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id1",
+        "type": "body",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id2",
+        "type" : "footer",
+        "html": "code",
+        "files": []
+      }],
+    "script":[
+      {
+        "id" : "id0",
+        "type": "header",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id1",
+        "type": "body",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id2",
+        "type" : "footer",
+        "html": "code",
+        "files": []
+      }]
   },
   "eval": {
-    "fields": {
-      "id" : {"specs":  "", "usw": 2}
-    },
-    "script": {
-      "id" : {"specs":  "", "usw": 2}
-    }
+    "fields": [
+      {
+        "id" : "id0",
+        "type": "header",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id1",
+        "type": "body",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id2",
+        "type" : "footer",
+        "html": "code",
+        "files": []
+      }],
+    "script":[
+      {
+        "id" : "id0",
+        "type": "header",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id1",
+        "type": "body",
+        "html": "code",
+        "files": []
+      }, {
+        "id" : "id2",
+        "type" : "footer",
+        "html": "code",
+        "files": []
+      }]
   }
 }
