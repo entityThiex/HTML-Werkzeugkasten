@@ -320,74 +320,69 @@
       }
 
       initDrag() {
-        const header = this.el.querySelector(".field-header");
-        let offsetX = 0;
-        let offsetY = 0;
-        let isDragging = false;
+        // Mache das Feld draggable
+        this.el.draggable = true;
 
-        header.addEventListener("mousedown", (e) => {
-          isDragging = true;
-          const rect = this.el.getBoundingClientRect();
-          offsetX = e.clientX - rect.left;
-          offsetY = e.clientY - rect.top;
-
-          document.addEventListener("mousemove", onMouseMove);
-          document.addEventListener("mouseup", onMouseUp);
+        // Drag & Drop für Reihenfolge
+        this.el.addEventListener('dragstart', (e) => {
+          this.el.classList.add('dragging');
+          this.el.style.opacity = '0.5';
+          e.dataTransfer.effectAllowed = 'move';
         });
 
-        const checkCollision = (x, y) => {
+        this.el.addEventListener('dragend', (e) => {
+          this.el.classList.remove('dragging');
+          this.el.style.opacity = '1';
+          this.repositionAllFields();
+        });
+
+        this.el.addEventListener('dragover', (e) => {
+          e.preventDefault();
           const container = document.getElementById("form-builder");
-          const allFields = container.querySelectorAll(".field");
-          const thisRect = {
-            left: x,
-            top: y,
-            right: x + this.el.offsetWidth,
-            bottom: y + this.el.offsetHeight
-          };
+          const draggingItem = container.querySelector('.dragging');
+          if (!draggingItem || draggingItem === this.el) return;
 
-          for (let field of allFields) {
-            if (field === this.el) continue;
+          const siblings = [...container.querySelectorAll('.field:not(.dragging)')];
+          const nextSibling = siblings.find(sibling => {
+            const box = sibling.getBoundingClientRect();
+            const offset = e.clientY - box.top - box.height / 2;
+            return offset < 0;
+          });
 
-            const fieldRect = {
-              left: parseInt(field.style.left),
-              top: parseInt(field.style.top),
-              right: parseInt(field.style.left) + field.offsetWidth,
-              bottom: parseInt(field.style.top) + field.offsetHeight
-            };
-
-            // Prüfe Überlappung
-            if (!(thisRect.right <= fieldRect.left || 
-                  thisRect.left >= fieldRect.right || 
-                  thisRect.bottom <= fieldRect.top || 
-                  thisRect.top >= fieldRect.bottom)) {
-              return true; // Kollision erkannt
-            }
+          if (nextSibling) {
+            container.insertBefore(draggingItem, nextSibling);
+          } else {
+            container.appendChild(draggingItem);
           }
-          return false; // Keine Kollision
-        };
+        });
 
-        const onMouseMove = (e) => {
-          if (!isDragging) return;
-          const parentRect = this.el.parentElement.getBoundingClientRect();
-          let x = e.clientX - parentRect.left - offsetX;
-          let y = e.clientY - parentRect.top - offsetY;
-
-          // Begrenzung im Container
-          x = Math.max(0, Math.min(parentRect.width - this.el.offsetWidth, x));
-          y = Math.max(0, Math.min(parentRect.height - this.el.offsetHeight, y));
-
-          // Prüfe auf Kollision
-          if (!checkCollision(x, y)) {
-            this.el.style.left = x + "px";
-            this.el.style.top = y + "px";
+        this.el.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          if (!this.el.classList.contains('dragging')) {
+            this.el.style.borderTop = '3px solid #007bff';
           }
-        };
+        });
 
-        const onMouseUp = () => {
-          isDragging = false;
-          document.removeEventListener("mousemove", onMouseMove);
-          document.removeEventListener("mouseup", onMouseUp);
-        };
+        this.el.addEventListener('dragleave', (e) => {
+          this.el.style.borderTop = '';
+        });
+
+        this.el.addEventListener('drop', (e) => {
+          e.preventDefault();
+          this.el.style.borderTop = '';
+        });
+      }
+
+      repositionAllFields() {
+        const container = document.getElementById("form-builder");
+        const allFields = container.querySelectorAll(".field");
+        let currentY = 0;
+
+        allFields.forEach(field => {
+          field.style.left = "0px";
+          field.style.top = currentY + "px";
+          currentY += field.offsetHeight + 10;
+        });
       }
 
       // Für spätere HTML-Erzeugung vorbereiten
@@ -1112,6 +1107,18 @@ function addMultipleChoiceField() {
         y: calculateNextPosition()
     });
 }
+
+// Drag & Drop für den Container aktivieren
+const formBuilder = document.getElementById("form-builder");
+
+formBuilder.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+});
+
+formBuilder.addEventListener('drop', (e) => {
+  e.preventDefault();
+});
   </script>
   <script>
       // script for updating and saving
