@@ -36,3 +36,15 @@ Auswertung
 •	Tabelle 
 •	Kurzbeschreibung über Tabelle 
 •	Button: Wiederherstellung Formblatt
+
+
+TODO:
+- autospeichern
+- preview?
+- pfeile verschieben
+- json update beim verschieben
+- conditional fields
+- werkzeugkasten test( word like text editing)
+- anhang anfügen
+- zip erstellen
+- auswertung brauchen wir noch ganz
