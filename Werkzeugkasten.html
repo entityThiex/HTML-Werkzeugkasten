@@ -161,7 +161,7 @@
           <button onclick="addNumberField()">Zahlen</button>
           <button onclick="addDateField()">Datum</button>
           <button onclick="addPictureField()">Bild</button>
-          <button onclick="addPictureField()">Datei</button>
+          <button onclick="addFileField()">Datei</button>
           <button onclick="addDropdownField()">Dropdown</button>
           <button onclick="addMultipleChoiceField()">Mehrfachauswahl</button>
       </div>
@@ -383,6 +383,7 @@
       }
     }
 
+
     class DropDownfield extends BaseField {
       constructor(options) {
         super({ ...options, type: "dropdown" });
@@ -551,10 +552,12 @@
       }
     }
 
+
     class DateField extends BaseField {
 
         constructor(options){
             super({...options, type: "date"});
+            this.titleEl.textContent = "Datum";
             this.createDateInput()
         }
 
@@ -581,26 +584,15 @@
         }
     }
 
-    /*
-    const dateField = new DateField({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });*/
-
-
 
     // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
     // Ist frei ziehbar, sollte auch nicht sein
     class InfoField extends BaseField {
 
-
-
         constructor(options){
             super({...options, type: "info", required: false});
             this.value
+            this.titleEl.textContent = "Infofeld";
             this.createInfoInput();
         }
 
@@ -642,21 +634,12 @@
         }
     }
 
-    /*
-    const infoField = new InfoField({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });
-
-     */
 
     class PictureField extends BaseField {
 
         constructor(options){
             super({...options, type: "picture"});
+            this.titleEl.textContent = "Bild";
             this.createPictureInput();
         }
 
@@ -684,21 +667,43 @@
         }
     }
 
-    /*
-    const pictureField = new PictureField({
-        title: "",
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });*/
 
+    class FileField extends BaseField {
 
+        constructor(options){
+            super({...options, type: "file"});
+            this.titleEl.textContent = "Datei";
+            this.createPictureInput();
+        }
+
+        createPictureInput() {
+            const wrapper = document.createElement("div");
+
+            // Label
+            const label = document.createElement("label");
+            label.textContent = "Datei Feld";
+            label.style.display = "block";
+            label.style.marginBottom = "4px";
+            label.style.fontSize = "12px";
+
+            // Input
+            const input = document.createElement("input");
+            input.type = "file";
+            input.style.width = "100%";
+            input.style.boxSizing = "border-box";
+
+            // Combine the ELEMENTS!!!!
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            this.bodyEl.appendChild(wrapper);
+        }
+    }
 
     class NumberField extends BaseField {
 
         constructor(options){
             super({...options, type: "number"});
+            this.titleEl.textContent = "Zahlenfeld";
             this.createNumberInput()
         }
 
@@ -724,13 +729,7 @@
             this.bodyEl.appendChild(wrapper);
         }
     }
-    /*
-    const numberField = new NumberField({
-        infoText: "",
-        required: true,
-        x: 100,
-        y: 100
-    });*/
+
 
     class Radio_MultipleChoicefield extends BaseField {
       constructor(options) {
@@ -950,6 +949,8 @@
       }
     }
 
+
+
 // Funktionen zum Erstellen der verschiedenen Feldtypen mit versetzten Positionen
 let fieldOffsetCounter = 0;
 
@@ -974,6 +975,17 @@ function addInfoField() {
     });
     fieldOffsetCounter++;
 }
+
+    function addFileField() {
+        new FileField({
+            title: "",
+            infoText: "",
+            required: false,
+            x: 0,
+            y: 0 + (fieldOffsetCounter * 30)
+        });
+        fieldOffsetCounter++;
+    }
 
 function addNumberField() {
     new NumberField({
