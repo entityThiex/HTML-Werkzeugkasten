@@ -538,6 +538,7 @@
      */
 
     // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
+    // Ist frei ziehbar, sollte auch nicht sein
     class InfoField extends BaseField {
 
 
@@ -580,7 +581,7 @@
                 infoText: this.infoText,   // gespeicherter Tooltip
                 required: this.required,
                 content: this.value,
-                x: rect.left - parentRect.left, 
+                x: rect.left - parentRect.left,
                 y: rect.top - parentRect.top
             };
         }
