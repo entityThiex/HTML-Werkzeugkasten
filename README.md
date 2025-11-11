@@ -27,8 +27,6 @@ Backend
 •	Bilder, PDF usw. öffnen 
 •	HTML erstellen können 
 •	Daten speichern in .json 
-•	Button-Klasse 
-•	Felder-Klasse 
 •	ZIP erstellen ??
 
 Auswertung
