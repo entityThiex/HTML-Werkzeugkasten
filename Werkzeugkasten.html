@@ -334,6 +334,37 @@
           document.addEventListener("mouseup", onMouseUp);
         });
 
+        const checkCollision = (x, y) => {
+          const container = document.getElementById("form-builder");
+          const allFields = container.querySelectorAll(".field");
+          const thisRect = {
+            left: x,
+            top: y,
+            right: x + this.el.offsetWidth,
+            bottom: y + this.el.offsetHeight
+          };
+
+          for (let field of allFields) {
+            if (field === this.el) continue;
+
+            const fieldRect = {
+              left: parseInt(field.style.left),
+              top: parseInt(field.style.top),
+              right: parseInt(field.style.left) + field.offsetWidth,
+              bottom: parseInt(field.style.top) + field.offsetHeight
+            };
+
+            // Prüfe Überlappung
+            if (!(thisRect.right <= fieldRect.left || 
+                  thisRect.left >= fieldRect.right || 
+                  thisRect.bottom <= fieldRect.top || 
+                  thisRect.top >= fieldRect.bottom)) {
+              return true; // Kollision erkannt
+            }
+          }
+          return false; // Keine Kollision
+        };
+
         const onMouseMove = (e) => {
           if (!isDragging) return;
           const parentRect = this.el.parentElement.getBoundingClientRect();
@@ -344,8 +375,11 @@
           x = Math.max(0, Math.min(parentRect.width - this.el.offsetWidth, x));
           y = Math.max(0, Math.min(parentRect.height - this.el.offsetHeight, y));
 
-          this.el.style.left = x + "px";
-          this.el.style.top = y + "px";
+          // Prüfe auf Kollision
+          if (!checkCollision(x, y)) {
+            this.el.style.left = x + "px";
+            this.el.style.top = y + "px";
+          }
         };
 
         const onMouseUp = () => {
@@ -968,9 +1002,35 @@
     }
 
 
-
 // Funktionen zum Erstellen der verschiedenen Feldtypen mit versetzten Positionen
 let fieldOffsetCounter = 0;
+let lastFieldHeight = 0;
+let currentYPosition = 0;
+
+function calculateNextPosition() {
+    const container = document.getElementById("form-builder");
+    const allFields = container.querySelectorAll(".field");
+    
+    if (allFields.length === 0) {
+        currentYPosition = 0;
+        return 0;
+    }
+    
+    // Finde das unterste Feld
+    let maxBottom = 0;
+    allFields.forEach(field => {
+        const top = parseInt(field.style.top) || 0;
+        const height = field.offsetHeight;
+        const bottom = top + height;
+        if (bottom > maxBottom) {
+            maxBottom = bottom;
+        }
+    });
+    
+    // Füge einen kleinen Abstand hinzu
+    currentYPosition = maxBottom + 10;
+    return currentYPosition;
+}
 
 function addTextField() {
     new Textfield({
@@ -978,9 +1038,8 @@ function addTextField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
 
 function addInfoField() {
@@ -989,21 +1048,19 @@ function addInfoField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
 
-    function addFileField() {
-        new FileField({
-            title: "",
-            infoText: "",
-            required: false,
-            x: 0,
-            y: 0 + (fieldOffsetCounter * 30)
-        });
-        fieldOffsetCounter++;
-    }
+function addFileField() {
+    new FileField({
+        title: "",
+        infoText: "",
+        required: false,
+        x: 0,
+        y: calculateNextPosition()
+    });
+}
 
 function addNumberField() {
     new NumberField({
@@ -1011,9 +1068,8 @@ function addNumberField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
 
 function addDateField() {
@@ -1022,9 +1078,8 @@ function addDateField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
 
 function addPictureField() {
@@ -1033,9 +1088,8 @@ function addPictureField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
 
 function addDropdownField() {
@@ -1044,9 +1098,8 @@ function addDropdownField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
 
 function addMultipleChoiceField() {
@@ -1055,9 +1108,8 @@ function addMultipleChoiceField() {
         infoText: "",
         required: false,
         x: 0,
-        y: 0 + (fieldOffsetCounter * 30)
+        y: calculateNextPosition()
     });
-    fieldOffsetCounter++;
 }
   </script>
   <script>
