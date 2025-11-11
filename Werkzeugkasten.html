@@ -235,9 +235,27 @@
         reqIndicator.textContent = this.required ? "*" : "";
         this.requiredIndicator = reqIndicator;
 
+        // Delete Button hinzufügen
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "×";
+        deleteBtn.style.marginLeft = "10px";
+        deleteBtn.style.padding = "2px 8px";
+        deleteBtn.style.backgroundColor = "#ff4444";
+        deleteBtn.style.color = "white";
+        deleteBtn.style.border = "none";
+        deleteBtn.style.borderRadius = "3px";
+        deleteBtn.style.cursor = "pointer";
+        deleteBtn.style.fontSize = "16px";
+        deleteBtn.style.fontWeight = "bold";
+        
+        deleteBtn.addEventListener("click", () => {
+          this.el.remove();
+        });
+
         rightHeader.appendChild(cb);
         rightHeader.appendChild(cbLabel);
         rightHeader.appendChild(reqIndicator);
+        rightHeader.appendChild(deleteBtn);
 
         header.appendChild(titleSpan);
         header.appendChild(rightHeader);
