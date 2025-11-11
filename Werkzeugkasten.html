@@ -536,13 +536,16 @@
     });
 
      */
-    
+
     // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
     class InfoField extends BaseField {
 
+
+
         constructor(options){
             super({...options, type: "info", required: false});
-            this.createInfoInput()
+            this.value
+            this.createInfoInput();
         }
 
         createInfoInput() {
@@ -558,6 +561,7 @@
             // Input
             const input = document.createElement("textarea");
             input.rows = 2;
+            this.value = input.value
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
 
@@ -565,6 +569,20 @@
             wrapper.appendChild(label);
             wrapper.appendChild(input);
             this.bodyEl.appendChild(wrapper);
+        }
+
+        toConfigObject() {
+            const rect = this.el.getBoundingClientRect();
+            const parentRect = this.el.parentElement.getBoundingClientRect();
+            return {
+                type: this.type,
+                title: this.title,         // gespeicherter individueller Titel
+                infoText: this.infoText,   // gespeicherter Tooltip
+                required: this.required,
+                content: this.value,
+                x: rect.left - parentRect.left, 
+                y: rect.top - parentRect.top
+            };
         }
     }
 
@@ -583,7 +601,7 @@
 
         constructor(options){
             super({...options, type: "picture"});
-            this.createPictureInput()
+            this.createPictureInput();
         }
 
         createPictureInput() {
