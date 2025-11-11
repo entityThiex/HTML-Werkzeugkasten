@@ -124,11 +124,11 @@
     }
     .dropdown-content {
         display: none;
-        position: absolute;
+        position: fixed;
         background-color: #f1f1f1;
         min-width: 160px;
         box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-        z-index: 1;
+        z-index: 2;
     }
 
     .dropdown-content button {
@@ -147,57 +147,85 @@
 
     /* Change the background color of the dropdown button when the dropdown content is shown */
     .dropdown:hover .dropbtn {background-color: #3e8e41;}
+
+    .topmenu {
+        height: 50px;
+        width: 100%;
+        position: sticky;
+        top: 0;
+        overflow-y: visible;
+        z-index: 1;
+    }
+
+    .page {
+        overflow-y: auto;
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
   </style>
 </head>
 <body>
 
 
-
-  <div class="dropdown">
-      <button class="dropbtn">Hinzufügen</button>
-      <div class="dropdown-content">
-          <button onclick="addTextField()">Text</button>
-          <button onclick="addInfoField()">Info</button>
-          <button onclick="addNumberField()">Zahlen</button>
-          <button onclick="addDateField()">Datum</button>
-          <button onclick="addPictureField()">Bild</button>
-          <button onclick="addFileField()">Datei</button>
-          <button onclick="addDropdownField()">Dropdown</button>
-          <button onclick="addMultipleChoiceField()">Mehrfachauswahl</button>
+    <div class="topmenu">
+      <div class="dropdown">
+          <button class="dropbtn">Hinzufügen</button>
+          <div class="dropdown-content">
+              <button onclick="addTextField()">Text</button>
+              <button onclick="addInfoField()">Info</button>
+              <button onclick="addNumberField()">Zahlen</button>
+              <button onclick="addDateField()">Datum</button>
+              <button onclick="addPictureField()">Bild</button>
+              <button onclick="addFileField()">Datei</button>
+              <button onclick="addDropdownField()">Dropdown</button>
+              <button onclick="addMultipleChoiceField()">Mehrfachauswahl</button>
+          </div>
       </div>
-  </div>
-  <div class="dropdown">
-      <button class="dropbtn">Export</button>
-      <div class="dropdown-content">
-          <button id="saveBtn">Speichern</button>
-          <button id="exportBtn">Exportieren</button>
+
+      <div class="dropdown">
+          <button class="dropbtn">Export</button>
+          <div class="dropdown-content">
+              <button id="saveBtn">Speichern</button>
+              <button id="exportBtn">Exportieren</button>
+          </div>
       </div>
-  </div>
-  <div class="dropdown">
-      <button class="dropbtn" id="importBtn">Import</button>
-      <div class="dropdown-content">
-          <input id="importFile" type="file" accept="*/*" style="width: 100%; box-sizing: border-box;">
-      </div>
-  </div>
+
+        <div class="dropdown">
+            <button class="dropbtn" id="importBtn">Import</button>
+            <div class="dropdown-content">
+                <input id="importFile" type="file" accept="*/*" style="width: 100%; box-sizing: border-box;">
+            </div>
+        </div>
+
+    </div>
 
 
-  <div id="form-builder" style="overflow-y: scroll"></div>
-
+    <div class="page">
+      <div id="form-builder"></div>
+    </div>
 
   <script>
     // ===== Oberklasse: BaseField =====
     class BaseField {
-      constructor(options){
-           // Erhöhe Zähler bei jeder neuen Instanz
+      static instanceCounter = 0;  // Statische Variable für alle Instanzen
+
+      /** Bei dem Konstruktoraufruf werden die übergebenen Obtionen
+       *ausgelesen und als Eigenschaften gespeichert
+       *Der Konstruktor gibt das neu erzeugte Objekt der Klasse zurück
+       */
+      constructor(options) {
+          // Erhöhe Zähler bei jeder neuen Instanz
           this.instanceId = options.id || specs["vars"]["id-counter"]++;  // Speichere aktuelle Nummer in der Instanz
 
-        this.type = options.type || "base";         
+          this.type = options.type || "base";
         this.title = options.title || "";       // intern gespeichert
         this.infoText = options.infoText || "";     
         this.required = !!options.required;
         this.x = options.x || 0;
         this.y = options.y || 0;
 
+        //durch diese Methoden kann das Feld ausgeführt und konfiguriert werden
         this.createDOM();
         this.initDrag();
         this.initRequiredCheckbox();
@@ -206,41 +234,49 @@
           insertField(this);
       }
 
+      //Sucht das Container-Element
       createDOM() {
         const container = document.getElementById("form-builder");
 
+        //Erzeugt das Haupt-DOM-Element für das Feld
         this.el = document.createElement("div");
-        this.el.className = "field";
-        this.el.style.left = this.x + "px";
-        this.el.style.top = this.y + "px";
+        this.el.className = "field"; //weißt eine CSS-Klasse für Styling zu
+        this.el.style.left = this.x + "px"; //Position X
+        this.el.style.top = this.y + "px"; //Position Y
 
-        // Header
+        //Header wird erstellt
         const header = document.createElement("div");
         header.className = "field-header";
 
+        //Erstellt das Titelelement im Header
         const titleSpan = document.createElement("span");
         titleSpan.className = "field-title";
         titleSpan.textContent = "Feld"; // Anzeige bleibt immer gleich
+
+        //falls ein Infotext existiert wird er hier als Attribut ergänzt
         if (this.infoText) {
           titleSpan.setAttribute("data-info", this.infoText);
         }
+
+        //Referenz auf das Titelelement wird gespeichert
         this.titleEl = titleSpan;
 
         const rightHeader = document.createElement("div");
-        rightHeader.className = "field-required";
+        rightHeader.className = "field-required"; //Container für Pflichtfeldanzeige/ Checkbox
 
         const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = this.required;
-        this.requiredCheckbox = cb;
+        cb.type = "checkbox"; //Checkbox zum Setzen des Pflichtfeldes
+        cb.checked = this.required; //Setzt den Status der Checkbox
+        this.requiredCheckbox = cb; //Speichert die direkte Referenz für späteres Abfragen
 
         const cbLabel = document.createElement("span");
-        cbLabel.textContent = "Pflicht";
+        cbLabel.textContent = "Pflicht"; /Text für Label
 
         const reqIndicator = document.createElement("span");
         reqIndicator.className = "field-required-indicator";
+        //Wenn Pflichtfeldmarker gesetzt ist wird ein Stern angezeigt
         reqIndicator.textContent = this.required ? "*" : "";
-        this.requiredIndicator = reqIndicator;
+        this.requiredIndicator = reqIndicator; //Referenz wird gespeichert
 
         // Delete Button hinzufügen
         const deleteBtn = document.createElement("button");
@@ -272,72 +308,92 @@
             removeField(this);
         });
 
+        //Checkbox, Label & Sternchen werden in "rechten Teil" hinzugefügt
         rightHeader.appendChild(cb);
         rightHeader.appendChild(cbLabel);
         rightHeader.appendChild(reqIndicator);
         rightHeader.appendChild(deleteBtn);
 
+        //Header wird um den "rechten Teil" (Label, Checkbox, Stern) ergänzt
         header.appendChild(titleSpan);
         header.appendChild(rightHeader);
 
         const body = document.createElement("div");
-        body.className = "field-body";
-        this.bodyEl = body;
+        body.className = "field-body"; //Hauptbereich für Feldinhalt
+        this.bodyEl = body; //Referenz speichern
 
+        //Hauptcontainer für das Feld wird mit Header und Body befüllt
         this.el.appendChild(header);
         this.el.appendChild(body);
+        //Feld hinzufügen um Sichtbarkeit herzustellen
         container.appendChild(this.el);
       }
-
+      /** Die Methode sorgt dafür, dass das Formularfeld sofort auf
+      *Änderungen reagiert (also bei Pflichtfeld-Checkbox)
+      *
+      *mit addEventListener kann auf dynamische Benutzeraktionen reagiert werden
+      */
       initRequiredCheckbox() {
         this.requiredCheckbox.addEventListener("change", () => {
+          //übernimmt den aktuellen Status der Checkbox und behandelt die Box dem entsprechend
           this.required = this.requiredCheckbox.checked;
+          //aktualisert die visuelle Anzeige d.h. Sternchen oder nicht
           this.requiredIndicator.textContent = this.required ? "*" : "";
         });
       }
 
-      // Titel + Zusatzinfo editierbar (intern gespeichert)
+      // Methode zur Initialisierung der Konfig-Oberfläche für Titel & Zusatzinfo
       initConfigUI() {
         const config = document.createElement("div");
         config.className = "field-config";
 
-        // Titel (intern gespeichert, nicht sichtbar im Header)
+        // Label für Titel-Input erstellen
         const titleLabel = document.createElement("label");
         titleLabel.textContent = "Titel";
 
+        //Textinput für Titel des Feldes anlegen
         const titleInput = document.createElement("input");
         titleInput.type = "text";
-        titleInput.value = this.title;
+        titleInput.value = this.title; //aktueller Titel wird angezeigt
 
+        //Durch Listener den Titel bei neuer Eingabe aktualisieren
         titleInput.addEventListener("input", () => {
-          this.title = titleInput.value;
+          this.title = titleInput.value; //Objekt wird mit Benutzereingabe synchronisiert
         });
 
-        // Zusatzinfo (Tooltip)
+        // Label für Textarea "Zusatzinfo" (Tooltip) erstellen
         const infoLabel = document.createElement("label");
         infoLabel.textContent = "Zusatzinfo";
 
+        //Mehrzeiliges Textfeld (Textarea) für die Zusatzinfo anlegen
         const infoInput = document.createElement("textarea");
         infoInput.rows = 2;
-        infoInput.value = this.infoText;
+        infoInput.value = this.infoText; //aktueller Zusatzinfo-Text
 
+        //Ereignislistener zur Aktualisierung der Zusatzinfo bei jeder Benutzereingabe
         infoInput.addEventListener("input", () => {
-          this.infoText = infoInput.value;
+          this.infoText = infoInput.value; //Variable wird angepasst
+
+          //Wenn Zusatzinfo nicht leer ist, wird entsprechendes data-Attribut gesetzt
           if (this.infoText.trim()) {
             this.titleEl.setAttribute("data-info", this.infoText);
           } else {
+            //Wenn Zusatzinfo leer ist wird das data-Attribut entfernt
             this.titleEl.removeAttribute("data-info");
           }
         });
 
+        //Konfigurations-Elemente zum Container hinzufügen
         config.appendChild(titleLabel);
         config.appendChild(titleInput);
         config.appendChild(infoLabel);
         config.appendChild(infoInput);
 
+        //
         this.bodyEl.appendChild(config);
       }
 
+      //Initialisiert die Dragfunktion für das Feld
       initDrag() {
         // Mache das Feld draggable
         this.el.draggable = true;
@@ -404,16 +460,23 @@
         });
       }
 
-      // Für spätere HTML-Erzeugung vorbereiten
+      // Liefert ein Konfigurationsobjekt mit allen wichtigen Daten des Feldes
       toConfigObject() {
+        //ermittelt die aktuelle Position und Größe des Feldes
         const rect = this.el.getBoundingClientRect();
+        //Position Elterncontainer
         const parentRect = this.el.parentElement.getBoundingClientRect();
+
+        //Gibt das Objekt mit allen relevanten Daten zurück
         return {
-            id: this.instanceId,
-          type: this.type,
+          id: this.instanceId,
+          type: this.type,            //Typ des Felds
           title: this.title,         // gespeicherter individueller Titel
-          infoText: this.infoText,   // gespeicherter Tooltip
-          required: this.required,
+          infoText: this.infoText,   // gespeicherte Zusatzinfo
+          required: this.required,    //Status Pflichtfeld
+
+          //Berechnet die X/Y Position und Größe des Feldes relativ zum Container
+          //damit eine präzise spätere Platzierung möglich ist
           x: rect.left - parentRect.left,
           y: rect.top - parentRect.top
         };
@@ -432,15 +495,15 @@
     class Textfield extends BaseField {
       constructor(options) {
         super({ ...options, type: "text" });
-        this.createTextInput();
-        this.titleEl.textContent = "Textfeld";
+        this.createTextInput();       //Initialisiert das eigentliche Eingabefeld im Body
+        this.titleEl.textContent = "Textfeld"; //Header Anzeige wird gesetzt
         updateField(this);
       }
 
       createTextInput() {
         const wrapper = document.createElement("div");
 
-        // Label hinzufügen
+        // Label für das Eingabefeld erzeugen, optisch verkleinert + Abstand
         const label = document.createElement("label");
         label.textContent = "Text";
         label.style.display = "block";
