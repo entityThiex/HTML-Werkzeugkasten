@@ -180,11 +180,9 @@
   <script>
     // ===== Oberklasse: BaseField =====
     class BaseField {
-      static instanceCounter = 0;  // Statische Variable für alle Instanzen
-
       constructor(options) {
-        BaseField.instanceCounter++;  // Erhöhe Zähler bei jeder neuen Instanz
-        this.instanceId = BaseField.instanceCounter;  // Speichere aktuelle Nummer in der Instanz
+          specs["vars"]["id-counter"]++ // Erhöhe Zähler bei jeder neuen Instanz
+          this.instanceId = specs["vars"]["id-counter"];  // Speichere aktuelle Nummer in der Instanz
         
         this.type = options.type || "base";         
         this.title = options.title || "";       // intern gespeichert
@@ -197,6 +195,8 @@
         this.initDrag();
         this.initRequiredCheckbox();
         this.initConfigUI(); // Titel + Zusatzinfo editierbar
+
+          insertField(this);
       }
 
       createDOM() {
@@ -350,6 +350,18 @@
           y: rect.top - parentRect.top
         };
       }
+
+      toHtml(){
+
+      }
+
+        getID(){
+            return this.instanceId;
+        }
+
+        getFiles(){
+          return [];
+        }
     }
     // Hinweis: toConfigObject() liefert später alle wichtigen Daten für HTML-Generierung
 
@@ -358,6 +370,7 @@
         super({ ...options, type: "text" });
         this.createTextInput();
         this.titleEl.textContent = "Textfeld";
+        updateField(this);
       }
 
       createTextInput() {
@@ -389,6 +402,7 @@
         this.options = [];
         this.createSelectInput();
         this.titleEl.textContent = "Dropdown-Feld";
+          updateField(this);
       }
 
       createSelectInput() {
@@ -555,7 +569,8 @@
 
         constructor(options){
             super({...options, type: "date"});
-            this.createDateInput()
+            this.createDateInput();
+            updateField(this);
         }
 
         createDateInput() {
@@ -595,13 +610,12 @@
     // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
     // Ist frei ziehbar, sollte auch nicht sein
     class InfoField extends BaseField {
-
-
+        value = null;
 
         constructor(options){
             super({...options, type: "info", required: false});
-            this.value
             this.createInfoInput();
+            updateField(this);
         }
 
         createInfoInput() {
@@ -658,6 +672,7 @@
         constructor(options){
             super({...options, type: "picture"});
             this.createPictureInput();
+            updateField(this);
         }
 
         createPictureInput() {
@@ -699,7 +714,8 @@
 
         constructor(options){
             super({...options, type: "number"});
-            this.createNumberInput()
+            this.createNumberInput();
+            updateField(this);
         }
 
         createNumberInput() {
@@ -739,6 +755,7 @@
         this.allowMultiple = false;
         this.createOptionsInput();
         this.titleEl.textContent = "Radio-/Multiple-Choice-Feld";
+          updateField(this);
       }
 
       createOptionsInput() {
@@ -1031,26 +1048,6 @@ function addMultipleChoiceField() {
 }
   </script>
   <script>
-      // script for updating and saving
-      function downloadBuilder(){
-          let jsonLink = document.createElement('a');
-          jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
-          jsonLink.download = 'specs.json';
-          jsonLink.click();
-      }
-
-      function exportBuilder(){
-          let formLink = document.createElement('a');
-          formLink.href = URL.createObjectURL(new File([getFormBlob()], "form.html"));
-          formLink.download = 'form.html';
-          formLink.click();
-
-          let evalLink = document.createElement('a');
-          evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
-          evalLink.download = 'eval.html';
-          evalLink.click();
-      }
-
       let specs = {
           "vars": {
               "id-counter": 0
@@ -1074,6 +1071,115 @@ function addMultipleChoiceField() {
               "fields": [],
               "scripts": []
           }
+      }
+
+      function render(formType = "form"){
+          let container = document.getElementById("form-builder");
+          container.innerHTML = "";
+
+          let formSpecs = specs[formType]["fields"];
+          for(let i = 0; i < formSpecs.length; i++){
+              window[formSpecs[i]["class"]](formSpecs[i]["config"]);
+          }
+      }
+
+      function insertField(field, formType = "form"){
+          let id = field.getID();
+          let pos = getFieldPos(id);
+          if(pos != null){
+              return updateField(field, formType);
+          }
+          else {
+              let pos = specs[formType]["fields"].length;
+              specs[formType]["fields"][pos] = {
+                  "id" : id,
+                  "class": field.constructor.name,
+                  "htmlType": "body",
+                  "html": field.toHtml(),
+                  "config": field.toConfigObject(),
+                  "files": field.getFiles()
+              }
+              return true;
+          }
+      }
+
+      function moveField(field, targetPos, formType = "form", pos = null){
+          if(field == null || !(field instanceof BaseField))
+              return false;
+
+          if(pos == null)
+              pos = getFieldPos(field.getID());
+
+          if(targetPos === pos)
+              return true;
+
+          let fieldSpecs = specs[formType]["fields"][pos];
+          if(targetPos < pos){
+              while(targetPos < pos){
+                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos-1];
+                  pos--;
+              }
+              specs[formType]["fields"][pos] = fieldSpecs;
+          }
+          else{
+              while(targetPos > pos){
+                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos+1];
+                  pos++;
+              }
+              specs[formType]["fields"][pos] = fieldSpecs;
+          }
+      }
+
+      function updateField(field, formType = "form", pos = null){
+          if(field == null || !(field instanceof BaseField))
+              return false;
+
+          if(pos == null)
+              pos = getFieldPos(field.getID());
+
+          let fieldSpecs = specs[formType]["fields"][pos];
+          fieldSpecs["htmlType"] = "body";
+          fieldSpecs["config"] = field.toConfigObject();
+          fieldSpecs["html"] = field.toHtml();
+          fieldSpecs["files"] = field.getFiles();
+
+          return true;
+      }
+
+      function getFieldPos(fieldID, formType = "form"){
+          let fields = specs[formType]["fields"];
+          if(fields != null && fields instanceof Array && fields.length > 0){
+              let i = 0;
+              while(i < fields.length){
+                  if(fields[i] != null && fields[i]["id"] === fieldID)
+                      return i;
+                  i++;
+              }
+          }
+          else {
+              return null;
+          }
+      }
+  </script>
+  <script>
+      // script for updating and saving
+      function downloadBuilder(){
+          let jsonLink = document.createElement('a');
+          jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
+          jsonLink.download = 'specs.json';
+          jsonLink.click();
+      }
+
+      function exportBuilder(){
+          let formLink = document.createElement('a');
+          formLink.href = URL.createObjectURL(new File([getFormBlob()], "form.html"));
+          formLink.download = 'form.html';
+          formLink.click();
+
+          let evalLink = document.createElement('a');
+          evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
+          evalLink.download = 'eval.html';
+          evalLink.click();
       }
 
       function createFormFromJson(){
@@ -1118,8 +1224,13 @@ function addMultipleChoiceField() {
 
       }
 
-      function loadFile(){
-
+      function loadJson(json){
+          if(json != null && json instanceof JSON && json.has("vars") && json.has("fields") && json.has("scripts")){
+              specs = json;
+          }
+          else {
+              // Todo display error
+          }
       }
 
       class Obj{
@@ -1193,6 +1304,5 @@ function addMultipleChoiceField() {
       document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
       document.getElementById("exportBtn").onclick = function() {exportBuilder()};
   </script>
-
 </body>
 </html>

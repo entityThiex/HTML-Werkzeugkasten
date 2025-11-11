@@ -6,34 +6,37 @@
     "fields": [
       {
         "id" : "id0",
-        "type": "header",
+        "formhtmlType": "header",
         "html": "code",
+        "config": {},
         "files": []
       }, {
         "id" : "id1",
-        "type": "body",
+        "formhtmlType": "body",
         "html": "code",
+        "config": {},
         "files": []
       }, {
         "id" : "id2",
-        "type" : "footer",
+        "formhtmlType" : "footer",
         "html": "code",
+        "config": {},
         "files": []
       }],
-    "script":[
+    "scripts":[
       {
         "id" : "id0",
-        "type": "header",
+        "formhtmlType": "header",
         "html": "code",
         "files": []
       }, {
         "id" : "id1",
-        "type": "body",
+        "htmlType": "body",
         "html": "code",
         "files": []
       }, {
         "id" : "id2",
-        "type" : "footer",
+        "htmlType" : "footer",
         "html": "code",
         "files": []
       }]
@@ -42,34 +45,38 @@
     "fields": [
       {
         "id" : "id0",
-        "type": "header",
+        "class": "Textfield",
+        "htmlType": "header",
         "html": "code",
+        "config": {},
         "files": []
       }, {
         "id" : "id1",
-        "type": "body",
+        "htmlType": "body",
+        "config": {},
         "html": "code",
         "files": []
       }, {
         "id" : "id2",
-        "type" : "footer",
+        "htmlType" : "footer",
         "html": "code",
+        "config": {},
         "files": []
       }],
     "script":[
       {
         "id" : "id0",
-        "type": "header",
+        "htmlType": "header",
         "html": "code",
         "files": []
       }, {
         "id" : "id1",
-        "type": "body",
+        "htmlType": "body",
         "html": "code",
         "files": []
       }, {
         "id" : "id2",
-        "type" : "footer",
+        "htmlType" : "footer",
         "html": "code",
         "files": []
       }]
