@@ -39,9 +39,9 @@ Auswertung
 
 
 TODO:
-- json update beim verschieben
-- anhang anfügen
-- zip erstellen
+- checkbox != radio in formular !
+- Bild in auswertung
+- nach jsonloading bild div resize
 
 Ideen:
 - werkzeugkasten test( word like text editing)
