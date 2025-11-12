@@ -1706,13 +1706,22 @@ function createAuswertungHTML() {
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 5px;
         }
 
         .upload-btn:hover {
             background-color: #3e8e41;
         }
 
-        #fileInput {
+        .zip-btn {
+            background-color: #ff8800;
+        }
+
+        .zip-btn:hover {
+            background-color: #cc6600;
+        }
+
+        #fileInput, #zipInput {
             display: none;
         }
 
@@ -1768,6 +1777,15 @@ function createAuswertungHTML() {
             display: none;
         }
 
+        .success-message {
+            background: #04AA6D;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+
         .file-info {
             margin-top: 10px;
             color: #666;
@@ -1796,13 +1814,8 @@ function createAuswertungHTML() {
             display: block;
         }
 
-        /* Change color of dropdown links on hover */
         .dropdown-content button:hover {background-color: #ddd;}
-
-        /* Show the dropdown menu on hover */
         .dropdown:hover .dropdown-content {display: block;}
-
-        /* Change the background color of the dropdown button when the dropdown content is shown */
         .dropdown:hover .dropbtn {background-color: #3e8e41;}
     </style>
 </head>
@@ -1818,6 +1831,11 @@ function createAuswertungHTML() {
             JSON Dateien hochladen
         </button>
 
+        <input type="file" id="zipInput" accept=".zip" multiple>
+        <button class="upload-btn zip-btn" onclick="document.getElementById('zipInput').click()">
+            ZIP Dateien hochladen
+        </button>
+
         <div class="dropdown">
             <button class="upload-btn">Exportieren</button>
             <div class="dropdown-content">
@@ -1828,11 +1846,12 @@ function createAuswertungHTML() {
 
         <div class="file-info" id="fileInfo"></div>
         <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
     </div>
 
     <div class="matrix-container">
         <div id="tableContainer">
-            <div class="no-data">Bitte laden Sie JSON-Dateien, um die Auswertung anzuzeigen.</div>
+            <div class="no-data">Bitte laden Sie JSON- oder ZIP-Dateien, um die Auswertung anzuzeigen.</div>
         </div>
     </div>
 </div>
@@ -1849,7 +1868,7 @@ function createAuswertungHTML() {
         fieldTitles = [];
 
         const fileInfo = document.getElementById('fileInfo');
-        fileInfo.textContent = \`${files.length} Datei(en) ausgewählt\`;
+        fileInfo.textContent = \`\${files.length} JSON-Datei(en) ausgewählt\`;
 
         let filesProcessed = 0;
 
@@ -1866,41 +1885,193 @@ function createAuswertungHTML() {
                         generateTable();
                     }
                 } catch (error) {
-                    showError(\`Fehler beim Laden von ${file.name}: ${error.message}\`);
+                    showError(\`Fehler beim Laden von \${file.name}: \${error.message}\`);
                 }
             };
 
             reader.onerror = function() {
-                showError(\`Fehler beim Lesen von ${file.name}\`);
+                showError(\`Fehler beim Lesen von \${file.name}\`);
             };
 
             reader.readAsText(file);
         });
     });
 
+    document.getElementById('zipInput').addEventListener('change', async function(e) {
+        const files = e.target.files;
+        if (files.length === 0) return;
+
+        allData = [];
+        fieldTitles = [];
+
+        let totalJsonFiles = 0;
+
+        for (const file of files) {
+            try {
+                const jsonFiles = await processZipFile(file);
+                totalJsonFiles += jsonFiles;
+            } catch (error) {
+                showError(\`Fehler beim Verarbeiten von \${file.name}: \${error.message}\`);
+            }
+        }
+
+        if (totalJsonFiles > 0) {
+            showSuccess(\`\${files.length} ZIP-Datei(en) verarbeitet, \${totalJsonFiles} JSON-Datei(en) gefunden\`);
+            generateTable();
+        } else {
+            showError('Keine JSON-Dateien in den ZIP-Archiven gefunden');
+        }
+
+        document.getElementById('zipInput').value = '';
+    });
+
+    async function processZipFile(zipFile) {
+        const arrayBuffer = await zipFile.arrayBuffer();
+        const jsonFiles = await extractJsonFromZip(arrayBuffer);
+        
+        jsonFiles.forEach(jsonFile => {
+            try {
+                const jsonData = JSON.parse(jsonFile.content);
+                processJsonData(jsonData, jsonFile.name);
+            } catch (error) {
+                console.error(\`Fehler beim Parsen von \${jsonFile.name}:\`, error);
+            }
+        });
+
+        return jsonFiles.length;
+    }
+
+    async function extractJsonFromZip(arrayBuffer) {
+        const view = new DataView(arrayBuffer);
+        const jsonFiles = [];
+        let offset = 0;
+
+        while (offset < arrayBuffer.byteLength - 4) {
+            const signature = view.getUint32(offset, true);
+
+            if (signature === 0x04034b50) {
+                const compressionMethod = view.getUint16(offset + 8, true);
+                const compressedSize = view.getUint32(offset + 18, true);
+                const uncompressedSize = view.getUint32(offset + 22, true);
+                const fileNameLength = view.getUint16(offset + 26, true);
+                const extraFieldLength = view.getUint16(offset + 28, true);
+
+                const fileNameStart = offset + 30;
+                const fileNameBytes = new Uint8Array(arrayBuffer, fileNameStart, fileNameLength);
+                const fileName = new TextDecoder().decode(fileNameBytes);
+
+                const dataStart = fileNameStart + fileNameLength + extraFieldLength;
+
+                if (fileName.toLowerCase().endsWith('.json') && !fileName.includes('__MACOSX') && !fileName.endsWith('/')) {
+                    try {
+                        let content;
+                        const compressedData = new Uint8Array(arrayBuffer, dataStart, compressedSize);
+
+                        if (compressionMethod === 0) {
+                            content = new TextDecoder().decode(compressedData);
+                        } else if (compressionMethod === 8) {
+                            const decompressed = await decompressDeflate(compressedData);
+                            content = new TextDecoder().decode(decompressed);
+                        } else {
+                            console.warn(\`Nicht unterstützte Komprimierung (\${compressionMethod}) für: \${fileName}\`);
+                            offset = dataStart + compressedSize;
+                            continue;
+                        }
+
+                        jsonFiles.push({ name: fileName, content: content });
+                    } catch (error) {
+                        console.error(\`Fehler beim Extrahieren von \${fileName}:\`, error);
+                    }
+                }
+
+                offset = dataStart + compressedSize;
+            } else {
+                offset++;
+            }
+        }
+
+        return jsonFiles;
+    }
+
+    async function decompressDeflate(compressedData) {
+        if (typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('deflate-raw');
+            const writer = ds.writable.getWriter();
+            writer.write(compressedData);
+            writer.close();
+
+            const chunks = [];
+            const reader = ds.readable.getReader();
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+            }
+
+            const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+            const result = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+                result.set(chunk, offset);
+                offset += chunk.length;
+            }
+
+            return result;
+        } else {
+            throw new Error('Komprimierte ZIP-Dateien werden in diesem Browser nicht unterstützt');
+        }
+    }
+
     function processJsonData(data, fileName) {
+        console.log('Processing:', fileName, data);
         const rowData = {
             fileName: fileName,
             values: {}
         };
 
-        if (data && Array.isArray(data)) {
-            data.forEach(field => {
-                const title = field.title || 'Unbekannt';
+        if (data.form && data.form.fields && Array.isArray(data.form.fields)) {
+            data.form.fields.forEach(field => {
+                const title = field.config.title || field.class || 'Unbekannt';
+                const value = getFieldValue(field.config);
+                console.log('Field:', title, '=', value);
 
                 if (!fieldTitles.includes(title)) {
                     fieldTitles.push(title);
                 }
-
+                rowData.values[title] = value;
+            });
+        } else if (data && Array.isArray(data)) {
+            data.forEach(field => {
+                const title = field.title || 'Unbekannt';
+                if (!fieldTitles.includes(title)) {
+                    fieldTitles.push(title);
+                }
                 rowData.values[title] = field.value;
             });
+        } else {
+            console.warn('Keine Felder in:', fileName, data);
         }
 
         allData.push(rowData);
+        console.log('Current allData:', allData);
+        console.log('Current fieldTitles:', fieldTitles);
+    }
+
+    function getFieldValue(field) {
+        if (field.value !== undefined && field.value !== null && field.value !== '') {
+            return field.value;
+        }
+        if (field.options && Array.isArray(field.options)) {
+            return field.options.join(', ');
+        }
+        return '-';
     }
 
     function generateTable() {
         const tableContainer = document.getElementById('tableContainer');
+
+        console.log('Generating table with', allData.length, 'rows and', fieldTitles.length, 'columns');
 
         if (allData.length === 0 || fieldTitles.length === 0) {
             tableContainer.innerHTML = '<div class="no-data">Keine Daten gefunden.</div>';
@@ -1911,18 +2082,18 @@ function createAuswertungHTML() {
         tableHTML += '<th>Dateiname</th>';
 
         fieldTitles.forEach(title => {
-            tableHTML += \`<th>${escapeHtml(title)}</th>\`;
+            tableHTML += \`<th>\${escapeHtml(title)}</th>\`;
         });
 
         tableHTML += '</tr></thead><tbody>';
 
         allData.forEach(row => {
             tableHTML += '<tr>';
-            tableHTML += \`<td>${escapeHtml(row.fileName)}</td>\`;
+            tableHTML += \`<td>\${escapeHtml(row.fileName)}</td>\`;
 
             fieldTitles.forEach(title => {
                 const value = row.values[title] || '-';
-                tableHTML += \`<td>${escapeHtml(String(value))}</td>\`;
+                tableHTML += \`<td>\${escapeHtml(String(value))}</td>\`;
             });
 
             tableHTML += '</tr>';
@@ -1945,6 +2116,16 @@ function createAuswertungHTML() {
 
         setTimeout(() => {
             errorDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+
+        setTimeout(() => {
+            successDiv.style.display = 'none';
         }, 5000);
     }
 <`+`/script>
