@@ -827,6 +827,14 @@
             const img = document.createElement("img")
             img.src = "#"
             img.alt = "Preview"
+            img.style.maxWidth = "100%"
+            img.style.maxHeight = "200px"
+            img.style.width = "auto"
+            img.style.height = "auto"
+            img.style.display = "none"
+            img.style.marginTop = "8px"
+            img.style.border = "1px solid #ccc"
+            img.style.borderRadius = "4px"
 
             // Input
             const input = document.createElement("input");
@@ -845,9 +853,10 @@
                     console.log(base64String);
                     upload = event.target.result;
                     id.bodyEl.children[1].children[2].src = base64String
+                    id.bodyEl.children[1].children[2].style.display = "block"
                     console.log(id.bodyEl.children[1].children[2].src)
                     id.repositionAllFields();
-                    updateFieldProperties(this.instanceId, {
+                    updateFieldProperties(id.instanceId, {
                         "value": base64String,
                     });
                 };
@@ -867,6 +876,24 @@
             this.bodyEl.appendChild(wrapper);
         }
 
+        createPicture(){
+                const wrapper = document.createElement("div");
+                if (this.value) {
+                    const img = document.createElement("img");
+                    img.src = this.value;
+                    img.alt = this.title;
+                    img.style.maxWidth = "100%";
+                    img.style.maxHeight = "400px";
+                    img.style.width = "auto";
+                    img.style.height = "auto";
+                    img.style.display = "block";
+                    img.style.marginTop = "8px";
+                    img.style.border = "1px solid #ccc";
+                    img.style.borderRadius = "4px";
+                    wrapper.appendChild(img);
+                }
+                this.bodyEl.appendChild(wrapper);
+            }
     }
 
 
@@ -2644,6 +2671,16 @@ function getAuswertungBlob() {
                     const img = document.createElement("img");
                     img.src = this.value;
                     img.alt = this.title;
+                    img.style.maxWidth = "100%";
+                    img.style.maxHeight = "400px";
+                    img.style.width = "auto";
+                    img.style.margin = "8px auto";
+                    img.style.display = "block";
+                    img.style.height = "auto";
+                    img.style.display = "block";
+                    img.style.marginTop = "8px";
+                    img.style.border = "1px solid #ccc";
+                    img.style.borderRadius = "4px";
                     wrapper.appendChild(img);
                 }
                 this.bodyEl.appendChild(wrapper);
@@ -2706,6 +2743,8 @@ function getAuswertungBlob() {
                 label.textContent = this.title;
                 wrapper.appendChild(label);
 
+                let selectedRadio = null;
+
                 this.options.forEach((optionText, index) => {
                     const optionWrapper = document.createElement("div");
                     optionWrapper.style.marginTop = "8px";
@@ -2721,6 +2760,19 @@ function getAuswertungBlob() {
                         input.type = "checkbox";
                     }else{
                         input.type = "radio";
+                        input.name = "radio_group_" + this.instanceId; // Alle Radios derselben Gruppe
+                        
+                        // Abwählen-Funktionalität für Radio-Buttons
+                        input.addEventListener('click', function(e) {
+                            if (selectedRadio === this) {
+                                // Wenn bereits ausgewählt, abwählen
+                                this.checked = false;
+                                selectedRadio = null;
+                            } else {
+                                // Neues Radio auswählen
+                                selectedRadio = this;
+                            }
+                        });
                     }
                     input.id = "field_" + this.instanceId + "_" + index;
                     input.name = "field_" + this.instanceId
