@@ -562,8 +562,12 @@
     class DropDownfield extends BaseField {
       constructor(options) {
         super({ ...options, type: "dropdown" });
-        this.options = [];
+        this.options = options.options || [];
         this.createSelectInput();
+          if (this.options.length != 0) {
+              console.log(this.options)
+              this.readdOptions();
+          }
         this.titleEl.textContent = "Dropdown-Feld";
           updateField(this);
       }
@@ -629,6 +633,13 @@
         this.optionsContainer = optionsContainer;
         this.bodyEl.appendChild(wrapper);
       }
+
+        readdOptions() {
+            this.options.forEach(input => {
+                console.log(input)
+                this.addOption(input.trim())
+            })
+        }
 
       addOption(text) {
         const optionDiv = document.createElement("div");
