@@ -306,7 +306,6 @@
       const field = this.el;
       const parent = this
       btnUp.onclick = function () {
-          console.log(field);
           container.insertBefore(field, field.previousElementSibling);
           if(field.previousElementSibling === null){
               moveField(field.id, 0);
@@ -321,7 +320,6 @@
       btnDown.className = "move-btn";
       btnDown.textContent = "v"
       btnDown.onclick = function () {
-          console.log(field);
           container.insertBefore(field.nextElementSibling, field);
           if(field.nextElementSibling === null){
               moveField(field.id);
@@ -845,14 +843,12 @@
             const id = this;
             const instanceID = this.instanceId;
             input.onchange = function () {
-                console.log("test");
                 let file = this.files[0];
                 let reader = new FileReader();
 
                 reader.onload = function (event) {
                     let base64String = event.target.result;
                     if(base64String != null && base64String !== ""){
-                        console.log(base64String);
                         upload = base64String;
                         id.bodyEl.children[1].children[2].src = base64String
                         id.bodyEl.children[1].children[2].style.display = "block"
@@ -866,8 +862,6 @@
             }
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
-            console.log(input);
-            console.log(this.picture64)
 
 
 
@@ -920,15 +914,11 @@
     class Radio_MultipleChoicefield extends BaseField {
       constructor(options) {
         super({ ...options, type: "radio_multiple" });
-        console.log("here" + options.options)
-          console.log(options.allowMultiple)
         this.options = options.options || [];
 
-        console.log(this.options)
         this.allowMultiple = options.allowMultiple || false;
         this.createOptionsInput();
           if (this.options.length != 0) {
-              console.log(this.options)
               this.readdOptions();
           }
         this.titleEl.textContent = "Radio-/Multiple-Choice-Feld";
@@ -1023,8 +1013,7 @@
 
       readdOptions() {
           this.options.forEach(input => {
-              console.log(input)
-              this.addOption(input.trim())
+              this.addOption(input.trim());
           })
       }
 
@@ -1084,7 +1073,6 @@
 
         optionDiv.appendChild(textContainer);
         optionDiv.appendChild(deleteButton);
-        console.log("test")
         this.optionsContainer.appendChild(optionDiv);
 
         this.updateOptions();
@@ -1325,10 +1313,7 @@ formBuilder.addEventListener('drop', (e) => {
           }
 
           for (let i = 0; i < formSpecs.length; i++) {
-              console.log("started" + i + ". time looping");
               renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
-              console.log("created a " + formSpecs[i]["class"]);
-              console.log("finished " + i + ". time looping");
           }
 
           if (givenSpecs !== null)
@@ -1377,21 +1362,15 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function updateFieldProperties(fieldID, attributes, formType = "form") {
-          console.log(fieldID);
-          console.log(attributes);
           if (attributes === null)
               return;
           let pos = getFieldPos(fieldID);
-          console.log(pos);
           if (pos === null)
               return;
           specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
-          console.log(specs[formType]["fields"][pos]["config"]);
       }
 
       function moveField(fieldID, targetPos = null, formType = "form", pos = null) {
-          console.log("field id: " + fieldID);
-          console.log("field at pos " + getFieldPos(fieldID) + " should be moved to " + targetPos);
           if (pos == null)
               pos = getFieldPos(fieldID);
 
@@ -1416,8 +1395,6 @@ formBuilder.addEventListener('drop', (e) => {
               specs[formType]["fields"][pos] = fieldSpecs;
           }
 
-          console.log("Element moved to position " + targetPos);
-
           return true;
       }
 
@@ -1438,7 +1415,6 @@ formBuilder.addEventListener('drop', (e) => {
 
       function getFieldPos(fieldID, formType = "form") {
           let fields = specs[formType]["fields"];
-          console.log(fields);
           if (fields != null) {
               let i = 0;
               while (i < fields.length) {
@@ -1465,7 +1441,6 @@ formBuilder.addEventListener('drop', (e) => {
         // script for updating and saving
         function downloadBuilder() {
             let jsonLink = document.createElement('a');
-            console.log(specs);
             jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
           jsonLink.download = 'specs.json';
           jsonLink.click();
@@ -1805,7 +1780,6 @@ function createAuswertungHTML() {
 
     function exportSpecs() {
         let jsonLink = document.createElement('a');
-        console.log(specs);
         jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
         jsonLink.download = 'specs.json';
         jsonLink.click();
@@ -1975,7 +1949,6 @@ function createAuswertungHTML() {
     }
 
     function processJsonData(data, fileName) {
-        console.log('Processing:', fileName, data);
         const rowData = {
             fileName: fileName,
             values: {}
@@ -1985,7 +1958,6 @@ function createAuswertungHTML() {
             data.form.fields.forEach(field => {
                 const title = field.config.title || field.class || 'Unbekannt';
                 const value = getFieldValue(field.config);
-                console.log('Field:', title, '=', value);
 
                 if (!fieldTitles.includes(title)) {
                     fieldTitles.push(title);
@@ -2005,8 +1977,6 @@ function createAuswertungHTML() {
         }
 
         allData.push(rowData);
-        console.log('Current allData:', allData);
-        console.log('Current fieldTitles:', fieldTitles);
     }
 
     function getFieldValue(field) {
@@ -2021,8 +1991,6 @@ function createAuswertungHTML() {
 
     function generateTable() {
         const tableContainer = document.getElementById('tableContainer');
-
-        console.log('Generating table with', allData.length, 'rows and', fieldTitles.length, 'columns');
 
         if (allData.length === 0 || fieldTitles.length === 0) {
             tableContainer.innerHTML = '<div class="no-data">Keine Daten gefunden.</div>';
@@ -2158,7 +2126,6 @@ function getAuswertungBlob() {
 <script>
     function createFormHtml(specs){
         let title = document.getElementById("title").value
-        console.log(title)
         return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -2283,7 +2250,6 @@ function getAuswertungBlob() {
 
     function exportSpecs() {
         let jsonLink = document.createElement('a');
-        console.log(specs);
         jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(specs)], {type: 'application/json'})], "specs.json"));
         jsonLink.download = 'specs.json';
         jsonLink.click();
@@ -2457,7 +2423,6 @@ function getAuswertungBlob() {
             } else if (fieldSpec.class === 'Radio_MultipleChoicefield') {
                 if (fieldSpec.config.allowMultiple) {
                     const checkboxes = document.querySelectorAll('input[name="field_' + fieldId + '"]:checked');
-                    console.log(checkboxes[0].labels[0].innerHTML)
                     value = Array.from(checkboxes).map(cb => cb.labels[0].innerHTML);
                 } else {
                     const radio = document.querySelector('input[name="field_' + fieldId + '"]:checked');
