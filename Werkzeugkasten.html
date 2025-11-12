@@ -271,18 +271,21 @@
       }
 
       createDOM() {
+        //Holt Container-Element in welchem ergänzt werden soll
         const container = document.getElementById("form-builder");
 
+        //Erstellt Haupt-Div für das Feld
         this.el = document.createElement("div");
         this.el.className = "field"; //weißt eine CSS-Klasse für Styling zu
         this.el.style.left = this.x + "px"; //Position X
         this.el.style.top = this.y + "px"; //Position Y
         this.el.id = String(this.instanceId)
 
-        // Header
+        // Header für das Feld erzeugen
         const header = document.createElement("div");
         header.className = "field-header";
 
+        //Titel-Element anlegen und ggf. Informationstext ergänzen
         const titleSpan = document.createElement("span");
         titleSpan.className = "field-title";
         titleSpan.textContent = "Feld"; // Anzeige bleibt immer gleich
@@ -291,6 +294,7 @@
         }
         this.titleEl = titleSpan;
 
+      //Up-Button
       const btnUp = document.createElement("button");
       btnUp.className = "move-btn";
       btnUp.textContent = "^"
@@ -308,6 +312,7 @@
           parent.repositionAllFields();
       };
 
+      //Down-Button
       const btnDown = document.createElement("button");
       btnDown.className = "move-btn";
       btnDown.textContent = "v"
@@ -448,11 +453,11 @@
         this.bodyEl.appendChild(config);
       }
 
+      //Drag & Drop für Reihenfolge der Felder
       initDrag() {
         // Mache das Feld draggable
         this.el.draggable = true;
 
-        // Drag & Drop für Reihenfolge
         this.el.addEventListener('dragstart', (e) => {
           this.el.classList.add('dragging');
           this.el.style.opacity = '0.5';
@@ -643,6 +648,7 @@
         inputContainer.appendChild(input);
         inputContainer.appendChild(addButton);
 
+        //ergänzt Label, Eingabefeld und Optionen
         wrapper.appendChild(label);
         wrapper.appendChild(inputContainer);
         wrapper.appendChild(optionsContainer);
@@ -653,6 +659,7 @@
 
       addOption(text) {
         const optionDiv = document.createElement("div");
+        //Layout
         optionDiv.style.display = "flex";
         optionDiv.style.justifyContent = "space-between";
         optionDiv.style.alignItems = "center";
@@ -705,6 +712,7 @@
             optionDiv.style.borderTop = 'none';
         });
 
+        //Aufhebung des highlight nach drop
         optionDiv.addEventListener('drop', (e) => {
             e.preventDefault();
             optionDiv.style.borderTop = 'none';
@@ -716,6 +724,7 @@
         optionText.style.pointerEvents = "none"; // Verhindert Störungen beim Drag & Drop
 
         const deleteButton = document.createElement("button");
+        //Layout
         deleteButton.textContent = "×";
         deleteButton.style.padding = "2px 6px";
         deleteButton.style.backgroundColor = "#ff4444";
@@ -777,6 +786,7 @@
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
 
+            //Änderungen werden bemerkt
             input.addEventListener("input", () => {
                 updateFieldProperties(this.instanceId, {
                     "value": input.value,
@@ -790,9 +800,7 @@
         }
     }
 
-
-    // Darf später nicht bearbeitbar sein, ansonsten ists gleich wie das Textfeld
-    // Ist frei ziehbar, sollte auch nicht sein
+    //Infofeld ist nicht Textfeld, Infofeld kann nicht mehr bearbeitet werden
     class InfoField extends BaseField {
         value = null;
 
@@ -895,7 +903,7 @@
                     upload = event.target.result;
                     id.bodyEl.children[1].children[2].src = base64String
                     console.log(id.bodyEl.children[1].children[2].src)
-                    id.repositionAllFields();
+                    id.repositionAllFields();   //ordnet und aktualisiert das Layout der Felder
                     updateFieldProperties(this.instanceId, {
                         "value": base64String,
                     });
@@ -1006,11 +1014,13 @@
         const multipleChoiceContainer = document.createElement("div");
         multipleChoiceContainer.style.marginBottom = "10px";
 
+        //Checkbox zum Aktivieren der Mehrfachauswahl
         const multipleChoice = document.createElement("input");
         multipleChoice.type = "checkbox";
         multipleChoice.id = "multipleChoice_" + this.instanceId;
         multipleChoice.checked = this.allowMultiple;
 
+        //Label für Checkbox
         const multipleChoiceLabel = document.createElement("label");
         multipleChoiceLabel.htmlFor = "multipleChoice_" + this.instanceId;
         multipleChoiceLabel.textContent = "Mehrfachauswahl erlauben";
@@ -1086,6 +1096,7 @@
 
       addOption(text) {
         const optionDiv = document.createElement("div");
+        //Layout
         optionDiv.style.display = "flex";
         optionDiv.style.justifyContent = "space-between";
         optionDiv.style.alignItems = "center";
@@ -1133,7 +1144,7 @@
 
         const textContainer = document.createElement("div");
         textContainer.style.display = "flex";
-        textContainer.style.alignItems = "center";
+        textContainer.style.alignItems = "center";  //zentrieren
         textContainer.style.flex = "1";
         textContainer.appendChild(inputPreview);
         textContainer.appendChild(optionText);
@@ -1142,10 +1153,11 @@
         optionDiv.appendChild(deleteButton);
         this.optionsContainer.appendChild(optionDiv);
 
-        this.updateOptions();
+        this.updateOptions();   //Felderupdate
       }
 
       addDragListeners(optionDiv) {
+        //Visuelles Feedback für Drag & Drop
         optionDiv.addEventListener('dragstart', (e) => {
             e.target.classList.add('dragging');
             e.target.style.opacity = '0.5';
@@ -1176,17 +1188,17 @@
 
         optionDiv.addEventListener('dragenter', (e) => {
             e.preventDefault();
-            optionDiv.style.borderTop = '2px solid #007bff';
+            optionDiv.style.borderTop = '2px solid #007bff';    //Visuelle Hervorhebung
         });
 
         optionDiv.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            optionDiv.style.borderTop = 'none';
+            optionDiv.style.borderTop = 'none'; //Hervorhebung dann wieder entfernen
         });
 
         optionDiv.addEventListener('drop', (e) => {
             e.preventDefault();
-            optionDiv.style.borderTop = 'none';
+            optionDiv.style.borderTop = 'none'; //nach dem Drop zurücksetzen
         });
       }
 
@@ -1242,7 +1254,7 @@ function calculateNextPosition() {
     currentYPosition = maxBottom + 10;
     return currentYPosition;
 }
-
+//Felder hinzufügen können
 function addTextField() {
     new Textfield({
         title: "",
@@ -1336,6 +1348,7 @@ formBuilder.addEventListener('drop', (e) => {
 });
   </script>
   <script>
+      //Formular-Konfigurationen: Aktuelle Werte & Standardwerte
       let specs = {
           "vars": {
               "id-counter": 0,
@@ -1367,11 +1380,13 @@ formBuilder.addEventListener('drop', (e) => {
           let container = document.getElementById("form-builder");
           container.innerHTML = "";
 
+          //Wählt die Feldspezifikationen
           let formSpecs = givenSpecs[formType]["fields"]
           if(givenSpecs === null) {
               formSpecs = specs[formType]["fields"];
           }
 
+          //Erstellt Felder gemäß Spezifikationen
           for(let i = 0; i < formSpecs.length; i++){
               console.log("started"+i+". time looping");
               renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
@@ -1385,6 +1400,7 @@ formBuilder.addEventListener('drop', (e) => {
 
       function renderField(type, args){
           switch (type){
+              //erstellt neues Feldobjekt je nach Typ mit den übergebenen Argumenten
               case "Textfield":
                   return new Textfield(args);
               case "DropDownfield":
@@ -1410,27 +1426,30 @@ formBuilder.addEventListener('drop', (e) => {
           let id = field.getID();
           let pos = getFieldPos(id);
           if(pos != null){
+              //Existiert bereits: Feld updaten
               return updateField(field, formType);
           }
           else {
+              //neu: an nächster freier Position einfügen
               let pos = specs[formType]["fields"].length;
               specs[formType]["fields"][pos] = {
+                  //
                   "id" : id,
                   "class": field.constructor.name,
                   "htmlType": "body",
                   "config": field.toConfigObject(),
                   "files": field.getFiles()
               }
-              return true;
+              return true;  //Bestätigung wenn erfolgreich
           }
       }
 
       function updateFieldProperties(fieldID, attributes, formType = "form"){
           if(attributes == null)
-              return;
+              return;   //keine neuen Werte: Funktion abbrechen
           let pos = getFieldPos(fieldID);
           if (pos == null)
-              return;
+              return;   //Feld nicht gefunden: Funktion abbrechen
           specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
       }
 
@@ -1440,13 +1459,16 @@ formBuilder.addEventListener('drop', (e) => {
           if(pos == null)
               pos = getFieldPos(fieldID);
 
+          //Zielfeld festlegen
           if(targetPos == null)
               targetPos = specs[formType]["fields"].length-1;
 
+          //wenn Quelle und Ziel gleich = keine Änderung nötig
           if(targetPos === pos)
               return true;
 
           let fieldSpecs = specs[formType]["fields"][pos];
+          //Verschieben nach oben, alle Felder dazwischen rücken eine Position weiter
           if(targetPos < pos){
               while(targetPos < pos){
                   specs[formType]["fields"][pos] = specs[formType]["fields"][pos-1];
@@ -1454,6 +1476,7 @@ formBuilder.addEventListener('drop', (e) => {
               }
               specs[formType]["fields"][pos] = fieldSpecs;
           }
+          //Verschieben nach unten, alle Felder dazwischen rücken eine Position zurück
           else{
               while(targetPos > pos){
                   specs[formType]["fields"][pos] = specs[formType]["fields"][pos+1];
@@ -1464,10 +1487,11 @@ formBuilder.addEventListener('drop', (e) => {
 
           console.log("Element moved to position "+targetPos);
 
-          return true;
+          return true;  //erfolgreich verschoben
       }
 
       function updateField(field, formType = "form", pos = null){
+          //überprüft ob Feld gültig ist
           if(field == null || !(field instanceof BaseField))
               return false;
 
@@ -1479,7 +1503,7 @@ formBuilder.addEventListener('drop', (e) => {
           fieldSpecs["config"] = field.toConfigObject();
           fieldSpecs["files"] = field.getFiles();
 
-          return true;
+          return true;  //erfolgreich aktualisiert
       }
 
       function getFieldPos(fieldID, formType = "form"){
@@ -1487,18 +1511,20 @@ formBuilder.addEventListener('drop', (e) => {
           console.log(fields);
           if(fields != null){
               let i = 0;
+              //sucht nach Feld mit der passenden ID
               while(i < fields.length){
                   if(fields[i] != null && fields[i]["id"] == fieldID)
-                      return i;
+                      return i; //Rückgabe der Position
                   i++;
               }
           }
           else {
-              return null;
+              return null;  //Kein Feldarray vorhanden
           }
       }
 
       function removeField(field, formType = "form"){
+          //prüft Feld auf Gültigkeit
           if(field == null || !(field instanceof BaseField))
               return false;
 
@@ -1606,13 +1632,17 @@ formBuilder.addEventListener('drop', (e) => {
           }
 
           append(jsonHtml){
+              //Nur JSON-Objekte mit "html"-Eigenschaften verarbeiten
               if(jsonHtml != null && typeof jsonHtml === 'object' && jsonHtml.html){
+                  //HTML-Snippet dem Header hinzufügen
                   if (jsonHtml.type && jsonHtml.type === "header"){
                       this.htmlHeader += jsonHtml.html;
                   }
+                  //HTML-Snippet dem Body-Bereich hinzufügen
                   else if (jsonHtml.type && jsonHtml.type === "body") {
                       this.htmlBody += jsonHtml.html;
                   }
+                  //HTML-Snippet dem Footer-Bereich hinzufügen
                   else if (jsonHtml.type && jsonHtml.type === "footer") {
                       this.htmlFooter += jsonHtml.html;
                   }
@@ -1652,11 +1682,14 @@ formBuilder.addEventListener('drop', (e) => {
               return this.json;
           }
       }
+      //Speichern-Button, startet Download der aktuellen Builder-Daten
       document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
+      //Export-Button, startet Export der Builder-Struktur
       document.getElementById("exportBtn").onclick = function() {exportBuilder()};
+      //Datei-Import, startet Import und leert das Feld nach Auswahl
       document.getElementById("importFile").onchange = function() {
           importBuilder();
-          document.getElementById("importFile").value = "";
+          document.getElementById("importFile").value = ""; //Reset des Input-Feldes
       };
   </script>
   <script>
