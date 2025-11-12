@@ -708,6 +708,7 @@
         // Aktualisiert das Array mit allen Optionen
         this.options = Array.from(this.optionsContainer.querySelectorAll("span"))
             .map(span => span.textContent);
+        updateFieldProperties(this.instanceId, {options: this.options})
       }
 
       toConfigObject() {
@@ -1087,6 +1088,7 @@
       updateOptions() {
         this.options = Array.from(this.optionsContainer.querySelectorAll("span"))
             .map(span => span.textContent);
+        updateFieldProperties(this.instanceId, {options: this.options})
       }
 
       toConfigObject() {
