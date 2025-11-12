@@ -110,6 +110,7 @@
         padding: 16px;
         font-size: 16px;
         border: none;
+        border-radius: 4px;
     }
 
     .dropdown {
@@ -175,11 +176,13 @@
         padding: 16px;
         font-size: 16px;
         border: none;
+        border-radius: 4px;
     }
 
     .title {
         padding: 15px;
         font-size: 16px;
+        border-radius: 4px;
     }
 
     .rightMenu {
@@ -556,8 +559,12 @@
     class DropDownfield extends BaseField {
       constructor(options) {
         super({ ...options, type: "dropdown" });
-        this.options = [];
+        this.options = options.options || [];
         this.createSelectInput();
+          if (this.options.length != 0) {
+              console.log(this.options)
+              this.readdOptions();
+          }
         this.titleEl.textContent = "Dropdown-Feld";
           updateField(this);
       }
@@ -623,6 +630,13 @@
         this.optionsContainer = optionsContainer;
         this.bodyEl.appendChild(wrapper);
       }
+
+        readdOptions() {
+            this.options.forEach(input => {
+                console.log(input)
+                this.addOption(input.trim())
+            })
+        }
 
       addOption(text) {
         const optionDiv = document.createElement("div");
@@ -745,6 +759,9 @@
             super({...options, type: "info", required: false});
             this.titleEl.textContent = "Infofeld";
             this.createInfoInput();
+            if (options.value != null) {
+                this.el.children[1].children[1].children[1].value = options.value
+            }
             updateField(this);
         }
 
