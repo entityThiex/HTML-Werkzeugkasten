@@ -779,11 +779,15 @@
             label.style.marginBottom = "4px";
             label.style.fontSize = "12px";
 
+            const img = document.createElement("img")
+            img.src = "#"
+            img.alt = "Preview"
+
             // Input
             const input = document.createElement("input");
             input.type = "file";
             input.accept = "image/*";
-            const id = this.instanceId;
+            const id = this;
             input.onchange = function () {
                 console.log("test");
                 let file = this.files[0];
@@ -793,7 +797,8 @@
                     let base64String = event.target.result;
                     console.log(base64String);
                     upload = event.target.result;
-
+                    id.bodyEl.children[1].children[2].src = base64String
+                    console.log(id.bodyEl.children[1].children[2].src)
                 };
                 reader.readAsDataURL(file);
             }
@@ -802,9 +807,12 @@
             console.log(input);
             console.log(this.picture64)
 
+
+
             // Combine the ELEMENTS!!!!
             wrapper.appendChild(label);
             wrapper.appendChild(input);
+            wrapper.appendChild(img)
             this.bodyEl.appendChild(wrapper);
         }
 
