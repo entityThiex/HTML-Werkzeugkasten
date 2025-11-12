@@ -71,7 +71,17 @@
     }
 
     .field-body {
-      padding: 8px 10px 10px;
+      padding: 10px 0;
+      position: relative;
+    }
+
+    .field-required-label {
+      position: absolute;
+      top: 0;
+      right: 0;
+      color: black;
+      font-size: 12px;
+      font-weight: bold;
     }
 
     .field-required-indicator {
@@ -2178,12 +2188,21 @@ function getAuswertungBlob() {
             gap: 4px;
             font-size: 12px;
         }
+        .field-required-label {
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: black;
+            font-size: 12px;
+            font-weight: bold;
+        }
         .field-required-indicator {
             color: #ffeb3b;
             font-size: 14px;
         }
         .field-body {
             padding: 10px 0;
+            position: relative;
         }
         label {
             display: block;
@@ -2502,39 +2521,19 @@ function getAuswertungBlob() {
                 this.el.className = "field";
                 this.el.id = String(this.instanceId);
 
-                const header = document.createElement("div");
-                header.className = "field-header";
-
-                const titleSpan = document.createElement("span");
-                titleSpan.className = "field-title";
-                titleSpan.textContent = this.title || "Feld";
-                if (this.infoText) {
-                    titleSpan.setAttribute("title", this.infoText);
-                }
-
-                const rightHeader = document.createElement("div");
-                rightHeader.className = "field-required";
-
-                if(this.required) {
-                    const cbLabel = document.createElement("span");
-                    cbLabel.textContent = "Pflicht";
-
-                    const reqIndicator = document.createElement("span");
-                    reqIndicator.className = "field-required-indicator";
-                    reqIndicator.textContent = "*";
-
-                    rightHeader.appendChild(cbLabel);
-                    rightHeader.appendChild(reqIndicator);
-                }
-
-                header.appendChild(titleSpan);
-                header.appendChild(rightHeader);
-
                 const body = document.createElement("div");
                 body.className = "field-body";
+                
+                // Pflicht-Label in den Body einfügen, wenn required
+                if(this.required) {
+                    const requiredLabel = document.createElement("span");
+                    requiredLabel.className = "field-required-label";
+                    requiredLabel.textContent = "Pflicht*";
+                    body.appendChild(requiredLabel);
+                }
+                
                 this.bodyEl = body;
 
-                this.el.appendChild(header);
                 this.el.appendChild(body);
                 container.appendChild(this.el);
             }
