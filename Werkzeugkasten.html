@@ -198,6 +198,13 @@
     .disapear {
         display: none;
     }
+
+    .preview {
+        max-height: 50px;
+        max-width: 50px;
+        display: inline-block;
+        position: relative;
+    }
   </style>
 </head>
 <body>
@@ -235,6 +242,8 @@
           </label>
           <label for="logo" class="btn">Logo wählen</label>
           <input type="file" accept="image/*" id="logo" class="disapear">
+
+          <img src="#" alt="" id="preview" class="preview">
 
       </div>
     </div>
@@ -1248,6 +1257,8 @@ formBuilder.addEventListener('drop', (e) => {
 
             reader.onload = function (event) {
                 specs["vars"]["image"] = event.target.result;
+                let preview = document.getElementById("preview");
+                preview.src = event.target.result;
             };
 
             reader.readAsDataURL(file);
@@ -1720,7 +1731,7 @@ function createAuswertungHTML() {
             </div>
         </div>
 
-        <button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
+        <button class="upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
 
         <div class="file-info" id="fileInfo"></div>
         <div class="error-message" id="errorMessage"></div>
