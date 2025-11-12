@@ -187,7 +187,6 @@
     }
 
     .rightMenu {
-        width: 25%;
         top: 0;
         right: 0;
         position: absolute;
@@ -197,6 +196,13 @@
 
     .disapear {
         display: none;
+    }
+
+    .preview {
+        max-width: 50px;
+        max-height: 50px;
+        position: relative;
+        display: inline-block;
     }
   </style>
 </head>
@@ -229,12 +235,17 @@
       <label for="importFile" class="btn">Import</label>
       <input id="importFile" type="file" accept="*/*" class="disapear">
 
-      <div class="rightMenu">
+      <div class="rightMenu" id="rightMenu">
           <label>
               <input type="text" placeholder="Titel" id="title" class="title">
           </label>
+
+
           <label for="logo" class="btn">Logo wählen</label>
           <input type="file" accept="image/*" id="logo" class="disapear">
+
+          <img src="#" alt="test" class="preview" id="preview">
+
 
       </div>
     </div>
@@ -1248,6 +1259,9 @@ formBuilder.addEventListener('drop', (e) => {
 
             reader.onload = function (event) {
                 specs["vars"]["image"] = event.target.result;
+                let preview = document.getElementById("preview");
+                preview.src = event.target.result
+
             };
 
             reader.readAsDataURL(file);
