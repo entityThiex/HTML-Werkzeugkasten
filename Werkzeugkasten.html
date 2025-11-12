@@ -172,6 +172,30 @@
         height: 50px;
         width: 100%;
     }
+
+    .btn {
+        background-color: #04AA6D;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+    }
+
+    .title {
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .rightMenu {
+        width: 25%;
+        right: 0;
+        position: absolute;
+        height: 48px;
+    }
+
+    .disapear {
+        display: none;
+    }
   </style>
 </head>
 <body>
@@ -199,7 +223,17 @@
               <button id="exportBtn">Exportieren</button>
           </div>
       </div>
-        <input id="importFile" type="file" accept="*/*" style="width: 25%; box-sizing: border-box;">
+        <label for="importFile" class="btn">Import</label>
+        <input id="importFile" type="file" accept="*/*" class="disapear">
+
+      <div class="rightMenu">
+          <label>
+              <input type="text" placeholder="Titel" id="titel" class="title">
+          </label>
+          <label for="logo" class="btn">Logo wählen</label>
+          <input type="file" accept="image/*" id="logo" class="disapear">
+
+      </div>
     </div>
 
     <div class="spacer"></div>
