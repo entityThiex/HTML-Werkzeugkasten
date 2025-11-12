@@ -2499,7 +2499,7 @@ async function collectFormData() {
             } else if (fieldSpec.class === 'Radio_MultipleChoicefield') {
                 if (fieldSpec.config.allowMultiple) {
                     const checkboxes = document.querySelectorAll('input[name="field_' + fieldId + '"]:checked');
-                    value = Array.from(checkboxes).map(cb => cb.labels[0].innerHTML);
+                    value = Array.from(checkboxes).map(cb => cb.value);
                 } else {
                     const radio = document.querySelector('input[name="field_' + fieldId + '"]:checked');
                     value = radio ? radio.value : '';
@@ -2804,7 +2804,7 @@ async function collectFormData() {
                     input.id = "field_" + this.instanceId + "_" + index;
                     input.name = "field_" + this.instanceId
 
-
+                    input.value = optionText;
                     optionWrapper.appendChild(input);
                     optionWrapper.appendChild(optionLabel);
                     wrapper.appendChild(optionWrapper);
