@@ -2378,45 +2378,102 @@ function getAuswertungBlob() {
         return (crc ^ 0xFFFFFFFF) >>> 0;
     }
 
-    async function exportFormAsZip() {
-        try {
-            const formData = await collectFormData();
-            const files = [];
-            
-            // JSON-Datei hinzufügen
-            const jsonString = JSON.stringify(formData, null, 2);
-            const jsonBytes = new TextEncoder().encode(jsonString);
-            files.push({
-                name: 'formular.json',
-                data: jsonBytes
-            });
-            
-            // Hochgeladene Dateien hinzufügen
-            for (const [fileName, fileData] of Object.entries(uploadedFiles)) {
-                files.push({
-                    name: fileName,
-                    data: fileData
-                });
+    // Füge diese Funktion vor exportFormAsZip() hinzu (um Zeile 2380)
+function validateRequiredFields() {
+    const formSpecs = specs.form.fields;
+    const missingFields = [];
+    
+    for (let i = 0; i < formSpecs.length; i++) {
+        const fieldSpec = formSpecs[i];
+        
+        // Überspringe nicht-Pflichtfelder und InfoFelder/PictureFelder
+        if (!fieldSpec.config.required || 
+            fieldSpec.class === 'InfoField' || 
+            fieldSpec.class === 'PictureField') {
+            continue;
+        }
+        
+        const fieldId = fieldSpec.config.id;
+        const fieldElement = document.getElementById('field_' + fieldId);
+        const fieldTitle = fieldSpec.config.title || 'Unbenanntes Feld';
+        
+        let isEmpty = false;
+        
+        if (fieldSpec.class === 'Textfield' || 
+            fieldSpec.class === 'NumberField' || 
+            fieldSpec.class === 'DateField') {
+            isEmpty = !fieldElement || !fieldElement.value || fieldElement.value.trim() === '';
+        } else if (fieldSpec.class === 'DropDownfield') {
+            isEmpty = !fieldElement || !fieldElement.value;
+        } else if (fieldSpec.class === 'FileField') {
+            isEmpty = !fieldElement || !fieldElement.files || fieldElement.files.length === 0;
+        } else if (fieldSpec.class === 'Radio_MultipleChoicefield') {
+            if (fieldSpec.config.allowMultiple) {
+                const checkboxes = document.querySelectorAll('input[name="field_' + fieldId + '"]:checked');
+                isEmpty = checkboxes.length === 0;
+            } else {
+                const radio = document.querySelector('input[name="field_' + fieldId + '"]:checked');
+                isEmpty = !radio;
             }
-            
-            const zipBlob = createZipFile(files);
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(zipBlob);
-            link.download = '${specs["vars"]["title"] || "formular"}_ausgefuellt.zip';
-            link.click();
-            
-            alert('Formular erfolgreich als ZIP exportiert!');
-        } catch (error) {
-            console.error('Fehler beim Export:', error);
-            alert('Fehler beim Exportieren des Formulars: ' + error.message);
+        }
+        
+        if (isEmpty) {
+            missingFields.push(fieldTitle);
         }
     }
+    
+    return missingFields;
+}
 
-    async function collectFormData() {
-        const formSpecs = specs.form.fields;
-        const result = {
-            form: {
-                fields: []
+// Ändere exportFormAsZip() (um Zeile 2381)
+async function exportFormAsZip() {
+    try {
+        // Validiere Pflichtfelder
+        const missingFields = validateRequiredFields();
+        
+        if (missingFields.length > 0) {
+            const fieldList = missingFields.map(field => '- ' + field).join('\\n');
+            alert('Bitte füllen Sie alle Pflichtfelder aus:\\n\\n' + fieldList);
+            return;
+        }
+        
+        const formData = await collectFormData();
+        const files = [];
+        
+        // JSON-Datei hinzufügen
+        const jsonString = JSON.stringify(formData, null, 2);
+        const jsonBytes = new TextEncoder().encode(jsonString);
+        files.push({
+            name: 'formular.json',
+            data: jsonBytes
+        });
+        
+        // Hochgeladene Dateien hinzufügen
+        for (const [fileName, fileData] of Object.entries(uploadedFiles)) {
+            files.push({
+                name: fileName,
+                data: fileData
+            });
+        }
+        
+        const zipBlob = createZipFile(files);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = '${specs["vars"]["title"] || "formular"}_ausgefuellt.zip';
+        link.click();
+        
+        alert('Formular erfolgreich als ZIP exportiert!');
+    } catch (error) {
+        console.error('Fehler beim Export:', error);
+        alert('Fehler beim Exportieren des Formulars: ' + error.message);
+    }
+}
+
+async function collectFormData() {
+    const formSpecs = specs.form.fields;
+    const result = {
+        form: {
+            fields: []
             }
         };
         
