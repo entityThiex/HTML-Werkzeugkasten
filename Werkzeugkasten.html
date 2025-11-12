@@ -256,7 +256,7 @@
     </div>
 
   <script>
-      
+
       document.getElementById("title").value = ""
     // ===== Oberklasse: BaseField =====
     class BaseField {
@@ -814,7 +814,7 @@
 
         createPictureInput() {
             const wrapper = document.createElement("div");
-            let upload = this.pircture64; //Lokale Kopie des gespeicherten Base64-Strings
+            let upload = this.picture64; //Lokale Kopie des gespeicherten Base64-Strings
 
             // Label
             const label = document.createElement("label");
@@ -843,6 +843,7 @@
 
             //Upload wird als Base64 eingelesen, gespeichert und Preview aktualisiert
             const id = this;
+            const instanceID = this.instanceId;
             input.onchange = function () {
                 console.log("test");
                 let file = this.files[0];
@@ -850,15 +851,16 @@
 
                 reader.onload = function (event) {
                     let base64String = event.target.result;
-                    console.log(base64String);
-                    upload = event.target.result;
-                    id.bodyEl.children[1].children[2].src = base64String
-                    id.bodyEl.children[1].children[2].style.display = "block"
-                    console.log(id.bodyEl.children[1].children[2].src)
-                    id.repositionAllFields();
-                    updateFieldProperties(id.instanceId, {
-                        "value": base64String,
-                    });
+                    if(base64String != null && base64String !== ""){
+                        console.log(base64String);
+                        upload = base64String;
+                        id.bodyEl.children[1].children[2].src = base64String
+                        id.bodyEl.children[1].children[2].style.display = "block"
+                        id.repositionAllFields();
+                        updateFieldProperties(instanceID, {
+                            "value": base64String,
+                        });
+                    }
                 };
                 reader.readAsDataURL(file);
             }
@@ -1375,12 +1377,16 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function updateFieldProperties(fieldID, attributes, formType = "form") {
-          if (attributes == null)
+          console.log(fieldID);
+          console.log(attributes);
+          if (attributes === null)
               return;
           let pos = getFieldPos(fieldID);
-          if (pos == null)
+          console.log(pos);
+          if (pos === null)
               return;
           specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
+          console.log(specs[formType]["fields"][pos]["config"]);
       }
 
       function moveField(fieldID, targetPos = null, formType = "form", pos = null) {
@@ -2761,7 +2767,7 @@ function getAuswertungBlob() {
                     }else{
                         input.type = "radio";
                         input.name = "radio_group_" + this.instanceId; // Alle Radios derselben Gruppe
-                        
+
                         // Abwählen-Funktionalität für Radio-Buttons
                         input.addEventListener('click', function(e) {
                             if (selectedRadio === this) {
