@@ -256,6 +256,8 @@
     </div>
 
   <script>
+      
+      document.getElementById("title").value = ""
     // ===== Oberklasse: BaseField =====
     class BaseField {
       constructor(options) {
@@ -2105,12 +2107,14 @@ function getAuswertungBlob() {
 }
   </script>
 <script>
-    function createFormHtml(specs){ // TODO fix image height
+    function createFormHtml(specs){
+        let title = document.getElementById("title").value
+        console.log(title)
         return `<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>${specs["vars"]["title"]}</title>
+    <title>${title}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
