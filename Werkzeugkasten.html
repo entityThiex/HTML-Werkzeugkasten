@@ -802,6 +802,7 @@
         constructor(options){
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
+            this.value = options.value || "";
             this.createPictureInput();
             updateField(this);
         }
@@ -866,6 +867,10 @@
             wrapper.appendChild(input);
             wrapper.appendChild(img)
             this.bodyEl.appendChild(wrapper);
+            if(this.value != null && this.value !== ""){
+                id.bodyEl.children[1].children[2].src = this.value;
+                id.bodyEl.children[1].children[2].style.display = "block"
+            }
         }
 
         createPicture(){
