@@ -47,21 +47,7 @@
       font-weight: bold;
       position: relative;
     }
-
-    /* Tooltip */
-    .field-title[data-info]:hover::after {
-      content: attr(data-info);
-      position: absolute;
-      left: 0;
-      top: 130%;
-      background: #333;
-      color: #fff;
-      padding: 6px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
+        
 
     .field-required {
       display: flex;
@@ -2182,6 +2168,32 @@ function getAuswertungBlob() {
             font-size: 14px;
             font-weight: bold;
         }
+        .field-title-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            position: relative;
+        }
+        
+        /* Tooltip für Zusatzinfo */
+        .field-title-label[data-info]:hover::after {
+            content: attr(data-info);
+            position: absolute;
+            left: 0;
+            top: 130%;
+            background: #333;
+            color: #fff;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: normal;
+            max-width: 300px;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
         .field-required {
             display: flex;
             align-items: center;
@@ -2581,6 +2593,20 @@ async function collectFormData() {
                 const body = document.createElement("div");
                 body.className = "field-body";
                 
+                // Titel mit Tooltip hinzufügen, wenn vorhanden
+                if(this.title) {
+                    const titleDiv = document.createElement("div");
+                    titleDiv.className = "field-title-label";
+                    titleDiv.textContent = this.title;
+                    
+                    // Füge Tooltip-Info hinzu, wenn vorhanden
+                    if(this.infoText) {
+                        titleDiv.setAttribute("data-info", this.infoText);
+                    }
+                    
+                    body.appendChild(titleDiv);
+                }
+                
                 // Pflicht-Label in den Body einfügen, wenn required
                 if(this.required) {
                     const requiredLabel = document.createElement("span");
@@ -2605,7 +2631,6 @@ async function collectFormData() {
             createTextInput() {
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
-                label.textContent = this.title;
 
                 const input = document.createElement("input");
                 input.type = "text";
@@ -2627,7 +2652,6 @@ async function collectFormData() {
             createDropdownInput(){
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
-                label.textContent = this.title;
 
                 const select = document.createElement("select");
                 select.id = "field_" + this.instanceId;
@@ -2654,7 +2678,6 @@ async function collectFormData() {
             createDateInput() {
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
-                label.textContent = this.title;
 
                 const input = document.createElement("input");
                 input.type = "date";
@@ -2723,7 +2746,6 @@ async function collectFormData() {
             createFileInput() {
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
-                label.textContent = this.title;
 
                 const input = document.createElement("input");
                 input.type = "file";
@@ -2744,7 +2766,6 @@ async function collectFormData() {
             createNumberInput() {
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
-                label.textContent = this.title;
 
                 const input = document.createElement("input");
                 input.type = "number";
@@ -2767,7 +2788,6 @@ async function collectFormData() {
             createOptionsInput() {
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
-                label.textContent = this.title;
                 wrapper.appendChild(label);
 
                 let selectedRadio = null;
