@@ -2446,36 +2446,40 @@ function getAuswertungBlob() {
                 super(config);
                 this.options = config.options || [];
                 this.allowMultiple = config.allowMultiple || false;
-                this.createOptions();
+                this.createOptionsInput();
             }
 
-            createOptions(){
+            createOptionsInput() {
                 const wrapper = document.createElement("div");
                 const label = document.createElement("label");
                 label.textContent = this.title;
-                wrapper.appendChild(label);
+
 
                 this.options.forEach((optionText, index) => {
                     const optionWrapper = document.createElement("div");
                     optionWrapper.style.marginTop = "8px";
 
-                    const input = document.createElement("input");
-                    input.type = this.allowMultiple ? "checkbox" : "radio";
-                    input.id = "field_" + this.instanceId + "_" + index;
-                    input.name = "field_" + this.instanceId;
-                    input.value = optionText;
-
                     const optionLabel = document.createElement("label");
-                    optionLabel.htmlFor = input.id;
+                    optionLabel.htmlFor = "field_" + this.instanceId + "_" + index;
                     optionLabel.textContent = optionText;
                     optionLabel.style.marginLeft = "8px";
                     optionLabel.style.fontWeight = "normal";
+
+                    const input = document.createElement("input");
+                    if(this.allowMultiple){
+                        input.type = "checkbox";
+                    }else{
+                        input.type = "radio";
+                    }
+                    input.id = "field_" + this.instanceId + "_" + index;
+
 
                     optionWrapper.appendChild(input);
                     optionWrapper.appendChild(optionLabel);
                     wrapper.appendChild(optionWrapper);
                 });
 
+                wrapper.appendChild(label);
                 this.bodyEl.appendChild(wrapper);
             }
         }
