@@ -2689,6 +2689,8 @@ function getAuswertungBlob() {
                 label.textContent = this.title;
                 wrapper.appendChild(label);
 
+                let selectedRadio = null;
+
                 this.options.forEach((optionText, index) => {
                     const optionWrapper = document.createElement("div");
                     optionWrapper.style.marginTop = "8px";
@@ -2704,6 +2706,19 @@ function getAuswertungBlob() {
                         input.type = "checkbox";
                     }else{
                         input.type = "radio";
+                        input.name = "radio_group_" + this.instanceId; // Alle Radios derselben Gruppe
+                        
+                        // Abwählen-Funktionalität für Radio-Buttons
+                        input.addEventListener('click', function(e) {
+                            if (selectedRadio === this) {
+                                // Wenn bereits ausgewählt, abwählen
+                                this.checked = false;
+                                selectedRadio = null;
+                            } else {
+                                // Neues Radio auswählen
+                                selectedRadio = this;
+                            }
+                        });
                     }
                     input.id = "field_" + this.instanceId + "_" + index;
 
