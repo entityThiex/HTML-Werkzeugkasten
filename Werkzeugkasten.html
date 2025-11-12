@@ -758,15 +758,19 @@
 
     class PictureField extends BaseField {
 
+        picture64 = null
+
         constructor(options){
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
             this.createPictureInput();
+            this.uploadPicture()
             updateField(this);
         }
 
         createPictureInput() {
             const wrapper = document.createElement("div");
+            let upload = this.picture64
 
             // Label
             const label = document.createElement("label");
@@ -775,18 +779,59 @@
             label.style.marginBottom = "4px";
             label.style.fontSize = "12px";
 
+            const img = document.createElement("img")
+            img.src = "#"
+            img.alt = "Preview"
+
             // Input
             const input = document.createElement("input");
             input.type = "file";
             input.accept = "image/*";
+            const id = this;
+            input.onchange = function () {
+                console.log("test");
+                let file = this.files[0];
+                let reader = new FileReader();
+
+                reader.onload = function (event) {
+                    let base64String = event.target.result;
+                    console.log(base64String);
+                    upload = event.target.result;
+                    id.bodyEl.children[1].children[2].src = base64String
+                    console.log(id.bodyEl.children[1].children[2].src)
+                };
+                reader.readAsDataURL(file);
+            }
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
+            console.log(input);
+            console.log(this.picture64)
+
+
 
             // Combine the ELEMENTS!!!!
             wrapper.appendChild(label);
             wrapper.appendChild(input);
+            wrapper.appendChild(img)
             this.bodyEl.appendChild(wrapper);
         }
+
+        uploadPicture() {
+            console.log(this.bodyEl.children[0])
+            console.log(this.bodyEl.children[0].children[1])
+            this.bodyEl.children[0].children[1].addEventListener("change", function () {
+                console.log("test")
+                let file = this.files[0];
+                let reader = new FileReader();
+
+                reader.onload = function (event) {
+                    let base64String = event.target.result;
+                    console.log(base64String);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
     }
 
 
@@ -1502,5 +1547,10 @@ formBuilder.addEventListener('drop', (e) => {
           document.getElementById("importFile").value = "";
       };
   </script>
+    <script>
+
+
+
+    </script>
 </body>
 </html>
