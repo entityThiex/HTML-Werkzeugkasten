@@ -231,7 +231,7 @@
 
       <div class="rightMenu">
           <label>
-              <input type="text" placeholder="Titel" id="titel" class="title">
+              <input type="text" placeholder="Titel" id="title" class="title">
           </label>
           <label for="logo" class="btn">Logo wählen</label>
           <input type="file" accept="image/*" id="logo" class="disapear">
@@ -1240,10 +1240,17 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
         document.getElementById("logo").onchange = function (event) {
-          specs["vars"]["image"] = event.target.result;
+            let file = this.files[0];
+            let reader = new FileReader();
+
+            reader.onload = function (event) {
+                specs["vars"]["image"] = event.target.result;
+            };
+
+            reader.readAsDataURL(file);
       }
-        document.getElementById("titel").onchange = function () {
-          specs["vars"]["title"] = document.getElementById("titel").value;
+        document.getElementById("title").onchange = function () {
+          specs["vars"]["title"] = document.getElementById("title").value;
         }
 
 
@@ -1400,7 +1407,7 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function exportBuilder(){
-        let title = document.getElementById("titel").value
+        let title = document.getElementById("title").value
         let formLink = document.createElement('a');
         formLink.href = URL.createObjectURL(new File([getFormBlob()], `${title}-Formular.html`));
         formLink.download = `${title}-Formular.html`;
@@ -1432,7 +1439,7 @@ formBuilder.addEventListener('drop', (e) => {
 
       function getFormBlob(){
           let htmlForm = new HtmlObj()
-          htmlForm.appendBody(returnFormHtml(specs));
+          htmlForm.appendBody(createFormHtml(specs));
           htmlForm.finish();
           return htmlForm.getDownloadFile();
       }
@@ -1523,13 +1530,13 @@ formBuilder.addEventListener('drop', (e) => {
   </script>
   <script>
 function createAuswertungHTML() {
-    let titel = document.getElementById("titel").value
+    let title = document.getElementById("title").value
     let logo = document.getElementById("logo")
     return `<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>${titel}</title>
+    <title>${title}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1692,7 +1699,8 @@ function createAuswertungHTML() {
 <body>
 <div class="container">
     <div class="title-box">
-        <h1>${titel}</h1>
+        <h1>${title}</h1>
+        <img src="${specs["vars"]["image"]}" alt="Logo" height="100" width=auto></img>
     </div>
 
     <div class="upload-box">
@@ -1729,6 +1737,8 @@ function createAuswertungHTML() {
 <script>
     let allData = [];
     let fieldTitles = [];
+
+    let specs = ${JSON.stringify(specs)};
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const files = e.target.files;
@@ -2006,7 +2016,7 @@ function createAuswertungHTML() {
             printWindow.document.open();
             const htmlContent = '<html lang="De">\\n' +
                 '<head>\\n' +
-                '<title>${titel}</title>\\n' +
+                '<title>${title}</title>\\n' +
                 '<style>\\n' +
                 'body { font-family: Arial, sans-serif; }\\n' +
                 'h1 { color: #333; }\\n' +
@@ -2018,7 +2028,7 @@ function createAuswertungHTML() {
                 '</style>\\n' +
                 '</head>\\n' +
                 '<body>\\n' +
-                '<h1>${titel}</h1>\\n' +
+                '<h1>${title}</h1>\\n' +
                 table +
                 '</body>\\n' +
                 '</html>';
@@ -2053,7 +2063,7 @@ function createAuswertungHTML() {
 
             let temp_link = document.createElement('a');
 
-            temp_link.download = \`${titel}.csv\`;
+            temp_link.download = \`${title}.csv\`;
         let url = window.URL.createObjectURL(CSVFile);
         temp_link.href = url;
 
@@ -2075,372 +2085,389 @@ function getAuswertungBlob() {
 }
   </script>
 <script>
-    function returnFormHtml(specs){
-        return "<!DOCTYPE html>\n" +
-        "<html lang=\"de\">\n" +
-        "<head>\n" +
-        "    <meta charset=\"UTF-8\">\n" +
-        "    <title>Formular</title>\n" +
-        "    <style>\n" +
-        "        body {\n" +
-        "            font-family: Arial, sans-serif;\n" +
-        "            margin: 20px;\n" +
-        "            background: #f0f0f0;\n" +
-        "        }\n" +
-        "        .field {\n" +
-        "            background: #ffffff;\n" +
-        "            border: 1px solid #ccc;\n" +
-        "            border-radius: 6px;\n" +
-        "            box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n" +
-        "            margin-bottom: 15px;\n" +
-        "            padding: 15px;\n" +
-        "        }\n" +
-        "        .field-header {\n" +
-        "            background: #007bff;\n" +
-        "            color: #fff;\n" +
-        "            padding: 8px 10px;\n" +
-        "            display: flex;\n" +
-        "            align-items: center;\n" +
-        "            justify-content: space-between;\n" +
-        "            border-radius: 6px 6px 0 0;\n" +
-        "            margin: -15px -15px 10px -15px;\n" +
-        "        }\n" +
-        "        .field-title {\n" +
-        "            font-size: 14px;\n" +
-        "            font-weight: bold;\n" +
-        "        }\n" +
-        "        .field-required {\n" +
-        "            display: flex;\n" +
-        "            align-items: center;\n" +
-        "            gap: 4px;\n" +
-        "            font-size: 12px;\n" +
-        "        }\n" +
-        "        .field-required-indicator {\n" +
-        "            color: #ffeb3b;\n" +
-        "            font-size: 14px;\n" +
-        "        }\n" +
-        "        .field-body {\n" +
-        "            padding: 10px 0;\n" +
-        "        }\n" +
-        "        label {\n" +
-        "            display: block;\n" +
-        "            margin-bottom: 4px;\n" +
-        "            font-size: 14px;\n" +
-        "            font-weight: bold;\n" +
-        "        }\n" +
-        "        input, textarea, select {\n" +
-        "            width: 100%;\n" +
-        "            box-sizing: border-box;\n" +
-        "            padding: 8px;\n" +
-        "            font-size: 14px;\n" +
-        "            border: 1px solid #ccc;\n" +
-        "            border-radius: 4px;\n" +
-        "        }\n" +
-        "        img {\n" +
-        "            max-width: 100%;\n" +
-        "            height: auto;\n" +
-        "        }\n" +
-        "    </style>\n" +
-        "</head>\n" +
-        "<body>\n" +
-        "    <div id=\"form-builder\"></div>\n" +
-        "    <script>\n" +
-        "        const specs = "+JSON.stringify(specs)+";\n" +
-        "        \n" +
-        "        function renderForm(givenSpecs, formType = \"form\") {\n" +
-        "            const container = document.getElementById(\"form-builder\");\n" +
-        "            if (!container) {\n" +
-        "                console.error('Container #form-builder nicht gefunden');\n" +
-        "                return;\n" +
-        "            }\n" +
-        "            container.innerHTML = \"\";\n" +
-        "\n" +
-        "            const formSpecs = givenSpecs[formType][\"fields\"];\n" +
-        "\n" +
-        "            for(let i = 0; i < formSpecs.length; i++){\n" +
-        "                renderFormField(formSpecs[i][\"class\"], formSpecs[i][\"config\"]);\n" +
-        "            }\n" +
-        "        }\n" +
-        "\n" +
-        "        function renderFormField(type, config){\n" +
-        "            switch (type){\n" +
-        "                case \"Textfield\":\n" +
-        "                    return new TextFormField(config);\n" +
-        "                case \"DropDownfield\":\n" +
-        "                    return new DropdownFormField(config);\n" +
-        "                case \"DateField\":\n" +
-        "                    return new DateFormField(config);\n" +
-        "                case \"InfoField\":\n" +
-        "                    return new InfoFormField(config);\n" +
-        "                case \"PictureField\":\n" +
-        "                    return new PictureFormField(config);\n" +
-        "                case \"FileField\":\n" +
-        "                    return new FileFormField(config);\n" +
-        "                case \"NumberField\":\n" +
-        "                    return new NumberFormField(config);\n" +
-        "                case \"Radio_MultipleChoicefield\":\n" +
-        "                    return new RadioMultipleChoiceFormField(config);\n" +
-        "                default:\n" +
-        "                    return null;\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                this.instanceId = config.id;\n" +
-        "                this.type = config.type || \"base\";\n" +
-        "                this.title = config.title || \"\";\n" +
-        "                this.infoText = config.infoText || \"\";\n" +
-        "                this.required = config.required || false;\n" +
-        "                this.x = config.x || 0;\n" +
-        "                this.y = config.y || 0;\n" +
-        "                \n" +
-        "                this.createFormField();\n" +
-        "            }\n" +
-        "\n" +
-        "            createFormField() {\n" +
-        "                const container = document.getElementById(\"form-builder\");\n" +
-        "\n" +
-        "                this.el = document.createElement(\"div\");\n" +
-        "                this.el.className = \"field\";\n" +
-        "                this.el.id = String(this.instanceId);\n" +
-        "\n" +
-        "                const header = document.createElement(\"div\");\n" +
-        "                header.className = \"field-header\";\n" +
-        "\n" +
-        "                const titleSpan = document.createElement(\"span\");\n" +
-        "                titleSpan.className = \"field-title\";\n" +
-        "                titleSpan.textContent = this.title || \"Feld\";\n" +
-        "                if (this.infoText) {\n" +
-        "                    titleSpan.setAttribute(\"title\", this.infoText);\n" +
-        "                }\n" +
-        "\n" +
-        "                const rightHeader = document.createElement(\"div\");\n" +
-        "                rightHeader.className = \"field-required\";\n" +
-        "                \n" +
-        "                if(this.required) {\n" +
-        "                    const cbLabel = document.createElement(\"span\");\n" +
-        "                    cbLabel.textContent = \"Pflicht\";\n" +
-        "\n" +
-        "                    const reqIndicator = document.createElement(\"span\");\n" +
-        "                    reqIndicator.className = \"field-required-indicator\";\n" +
-        "                    reqIndicator.textContent = \"*\";\n" +
-        "                    \n" +
-        "                    rightHeader.appendChild(cbLabel);\n" +
-        "                    rightHeader.appendChild(reqIndicator);\n" +
-        "                }\n" +
-        "\n" +
-        "                header.appendChild(titleSpan);\n" +
-        "                header.appendChild(rightHeader);\n" +
-        "\n" +
-        "                const body = document.createElement(\"div\");\n" +
-        "                body.className = \"field-body\";\n" +
-        "                this.bodyEl = body;\n" +
-        "\n" +
-        "                this.el.appendChild(header);\n" +
-        "                this.el.appendChild(body);\n" +
-        "                container.appendChild(this.el);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class TextFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.createTextInput();\n" +
-        "            }\n" +
-        "\n" +
-        "            createTextInput() {\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const label = document.createElement(\"label\");\n" +
-        "                label.textContent = this.title;\n" +
-        "\n" +
-        "                const input = document.createElement(\"input\");\n" +
-        "                input.type = \"text\";\n" +
-        "                input.id = \"field_\" + this.instanceId;\n" +
-        "\n" +
-        "                wrapper.appendChild(label);\n" +
-        "                wrapper.appendChild(input);\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class DropdownFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.options = config.options || [];\n" +
-        "                this.createDropdownInput();\n" +
-        "            }\n" +
-        "            \n" +
-        "            createDropdownInput(){\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const label = document.createElement(\"label\");\n" +
-        "                label.textContent = this.title;\n" +
-        "\n" +
-        "                const select = document.createElement(\"select\");\n" +
-        "                select.id = \"field_\" + this.instanceId;\n" +
-        "\n" +
-        "                this.options.forEach(optionText => {\n" +
-        "                    const option = document.createElement(\"option\");\n" +
-        "                    option.value = optionText;\n" +
-        "                    option.textContent = optionText;\n" +
-        "                    select.appendChild(option);\n" +
-        "                });\n" +
-        "\n" +
-        "                wrapper.appendChild(label);\n" +
-        "                wrapper.appendChild(select);\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class DateFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.createDateInput();\n" +
-        "            }\n" +
-        "\n" +
-        "            createDateInput() {\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const label = document.createElement(\"label\");\n" +
-        "                label.textContent = this.title;\n" +
-        "\n" +
-        "                const input = document.createElement(\"input\");\n" +
-        "                input.type = \"date\";\n" +
-        "                input.id = \"field_\" + this.instanceId;\n" +
-        "\n" +
-        "                wrapper.appendChild(label);\n" +
-        "                wrapper.appendChild(input);\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class InfoFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.value = config.value || \"\";\n" +
-        "                this.createInfoText();\n" +
-        "            }\n" +
-        "            \n" +
-        "            createInfoText(){\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const text = document.createElement(\"p\");\n" +
-        "                text.textContent = this.value;\n" +
-        "                text.style.margin = \"0\";\n" +
-        "                text.style.fontSize = \"14px\";\n" +
-        "\n" +
-        "                wrapper.appendChild(text);\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class PictureFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.value = config.value || \"\";\n" +
-        "                this.createPicture();\n" +
-        "            }\n" +
-        "            \n" +
-        "            createPicture(){\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                if (this.value) {\n" +
-        "                    const img = document.createElement(\"img\");\n" +
-        "                    img.src = this.value;\n" +
-        "                    img.alt = this.title;\n" +
-        "                    wrapper.appendChild(img);\n" +
-        "                }\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class FileFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.createFileInput();\n" +
-        "            }\n" +
-        "\n" +
-        "            createFileInput() {\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const label = document.createElement(\"label\");\n" +
-        "                label.textContent = this.title;\n" +
-        "\n" +
-        "                const input = document.createElement(\"input\");\n" +
-        "                input.type = \"file\";\n" +
-        "                input.id = \"field_\" + this.instanceId;\n" +
-        "\n" +
-        "                wrapper.appendChild(label);\n" +
-        "                wrapper.appendChild(input);\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class NumberFormField extends BaseFormField{\n" +
-        "            constructor(config) {\n" +
-        "                super(config);\n" +
-        "                this.createNumberInput();\n" +
-        "            }\n" +
-        "\n" +
-        "            createNumberInput() {\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const label = document.createElement(\"label\");\n" +
-        "                label.textContent = this.title;\n" +
-        "\n" +
-        "                const input = document.createElement(\"input\");\n" +
-        "                input.type = \"number\";\n" +
-        "                input.id = \"field_\" + this.instanceId;\n" +
-        "\n" +
-        "                wrapper.appendChild(label);\n" +
-        "                wrapper.appendChild(input);\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        class RadioMultipleChoiceFormField extends BaseFormField{\n" +
-        "            constructor(config){\n" +
-        "                super(config);\n" +
-        "                this.options = config.options || [];\n" +
-        "                this.allowMultiple = config.allowMultiple || false;\n" +
-        "                this.createOptions();\n" +
-        "            }\n" +
-        "            \n" +
-        "            createOptions(){\n" +
-        "                const wrapper = document.createElement(\"div\");\n" +
-        "                const label = document.createElement(\"label\");\n" +
-        "                label.textContent = this.title;\n" +
-        "                wrapper.appendChild(label);\n" +
-        "\n" +
-        "                this.options.forEach((optionText, index) => {\n" +
-        "                    const optionWrapper = document.createElement(\"div\");\n" +
-        "                    optionWrapper.style.marginTop = \"8px\";\n" +
-        "\n" +
-        "                    const input = document.createElement(\"input\");\n" +
-        "                    input.type = this.allowMultiple ? \"checkbox\" : \"radio\";\n" +
-        "                    input.id = \"field_\" + this.instanceId + \"_\" + index;\n" +
-        "                    input.name = \"field_\" + this.instanceId;\n" +
-        "                    input.value = optionText;\n" +
-        "\n" +
-        "                    const optionLabel = document.createElement(\"label\");\n" +
-        "                    optionLabel.htmlFor = input.id;\n" +
-        "                    optionLabel.textContent = optionText;\n" +
-        "                    optionLabel.style.marginLeft = \"8px\";\n" +
-        "                    optionLabel.style.fontWeight = \"normal\";\n" +
-        "\n" +
-        "                    optionWrapper.appendChild(input);\n" +
-        "                    optionWrapper.appendChild(optionLabel);\n" +
-        "                    wrapper.appendChild(optionWrapper);\n" +
-        "                });\n" +
-        "\n" +
-        "                this.bodyEl.appendChild(wrapper);\n" +
-        "            }\n" +
-        "        }\n" +
-        "        \n" +
-        "        // Render nach DOM-Load\n" +
-        "        if (document.readyState === 'loading') {\n" +
-        "            document.addEventListener('DOMContentLoaded', () => renderForm(specs));\n" +
-        "        } else {\n" +
-        "            renderForm(specs);\n" +
-        "        }\n" +
-        "    <"+"/script>\n" +
-        "</body>\n" +
-        "</html>";
+    function createFormHtml(specs){ // TODO fix image height
+        return `<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>${specs["vars"]["title"]}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+         .title-box {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+         .title-box h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .field {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+        .field-header {
+            background: #007bff;
+            color: #fff;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 6px 6px 0 0;
+            margin: -15px -15px 10px -15px;
+        }
+        .field-title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .field-required {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+        }
+        .field-required-indicator {
+            color: #ffeb3b;
+            font-size: 14px;
+        }
+        .field-body {
+            padding: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-box">
+        <h1>${specs["vars"]["title"]}</h1>
+        <img src="${specs["vars"]["image"]}" alt="Logo" height="100" width=auto></img>
+        </div>
+    <div id="form-builder"></div>
+    <script>
+        const specs = ${JSON.stringify(specs)};
+
+        function renderForm(givenSpecs, formType = "form") {
+            const container = document.getElementById("form-builder");
+            if (!container) {
+                console.error('Container #form-builder nicht gefunden');
+                return;
+            }
+            container.innerHTML = "";
+
+            const formSpecs = givenSpecs[formType]["fields"];
+
+            for(let i = 0; i < formSpecs.length; i++){
+                renderFormField(formSpecs[i]["class"], formSpecs[i]["config"]);
+            }
+        }
+
+        function renderFormField(type, config){
+            switch (type){
+                case "Textfield":
+                    return new TextFormField(config);
+                case "DropDownfield":
+                    return new DropdownFormField(config);
+                case "DateField":
+                    return new DateFormField(config);
+                case "InfoField":
+                    return new InfoFormField(config);
+                case "PictureField":
+                    return new PictureFormField(config);
+                case "FileField":
+                    return new FileFormField(config);
+                case "NumberField":
+                    return new NumberFormField(config);
+                case "Radio_MultipleChoicefield":
+                    return new RadioMultipleChoiceFormField(config);
+                default:
+                    return null;
+            }
+        }
+
+        class BaseFormField{
+            constructor(config) {
+                this.instanceId = config.id;
+                this.type = config.type || "base";
+                this.title = config.title || "";
+                this.infoText = config.infoText || "";
+                this.required = config.required || false;
+                this.x = config.x || 0;
+                this.y = config.y || 0;
+
+                this.createFormField();
+            }
+
+            createFormField() {
+                const container = document.getElementById("form-builder");
+
+                this.el = document.createElement("div");
+                this.el.className = "field";
+                this.el.id = String(this.instanceId);
+
+                const header = document.createElement("div");
+                header.className = "field-header";
+
+                const titleSpan = document.createElement("span");
+                titleSpan.className = "field-title";
+                titleSpan.textContent = this.title || "Feld";
+                if (this.infoText) {
+                    titleSpan.setAttribute("title", this.infoText);
+                }
+
+                const rightHeader = document.createElement("div");
+                rightHeader.className = "field-required";
+
+                if(this.required) {
+                    const cbLabel = document.createElement("span");
+                    cbLabel.textContent = "Pflicht";
+
+                    const reqIndicator = document.createElement("span");
+                    reqIndicator.className = "field-required-indicator";
+                    reqIndicator.textContent = "*";
+
+                    rightHeader.appendChild(cbLabel);
+                    rightHeader.appendChild(reqIndicator);
+                }
+
+                header.appendChild(titleSpan);
+                header.appendChild(rightHeader);
+
+                const body = document.createElement("div");
+                body.className = "field-body";
+                this.bodyEl = body;
+
+                this.el.appendChild(header);
+                this.el.appendChild(body);
+                container.appendChild(this.el);
+            }
+        }
+
+        class TextFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createTextInput();
+            }
+
+            createTextInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "text";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class DropdownFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.options = config.options || [];
+                this.createDropdownInput();
+            }
+
+            createDropdownInput(){
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const select = document.createElement("select");
+                select.id = "field_" + this.instanceId;
+
+                this.options.forEach(optionText => {
+                    const option = document.createElement("option");
+                    option.value = optionText;
+                    option.textContent = optionText;
+                    select.appendChild(option);
+                });
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(select);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class DateFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createDateInput();
+            }
+
+            createDateInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "date";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class InfoFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.value = config.value || "";
+                this.createInfoText();
+            }
+
+            createInfoText(){
+                const wrapper = document.createElement("div");
+                const text = document.createElement("p");
+                text.textContent = this.value;
+                text.style.margin = "0";
+                text.style.fontSize = "14px";
+
+                wrapper.appendChild(text);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class PictureFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.value = config.value || "";
+                this.createPicture();
+            }
+
+            createPicture(){
+                const wrapper = document.createElement("div");
+                if (this.value) {
+                    const img = document.createElement("img");
+                    img.src = this.value;
+                    img.alt = this.title;
+                    wrapper.appendChild(img);
+                }
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class FileFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createFileInput();
+            }
+
+            createFileInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "file";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class NumberFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createNumberInput();
+            }
+
+            createNumberInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class RadioMultipleChoiceFormField extends BaseFormField{
+            constructor(config){
+                super(config);
+                this.options = config.options || [];
+                this.allowMultiple = config.allowMultiple || false;
+                this.createOptions();
+            }
+
+            createOptions(){
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+                wrapper.appendChild(label);
+
+                this.options.forEach((optionText, index) => {
+                    const optionWrapper = document.createElement("div");
+                    optionWrapper.style.marginTop = "8px";
+
+                    const input = document.createElement("input");
+                    input.type = this.allowMultiple ? "checkbox" : "radio";
+                    input.id = "field_" + this.instanceId + "_" + index;
+                    input.name = "field_" + this.instanceId;
+                    input.value = optionText;
+
+                    const optionLabel = document.createElement("label");
+                    optionLabel.htmlFor = input.id;
+                    optionLabel.textContent = optionText;
+                    optionLabel.style.marginLeft = "8px";
+                    optionLabel.style.fontWeight = "normal";
+
+                    optionWrapper.appendChild(input);
+                    optionWrapper.appendChild(optionLabel);
+                    wrapper.appendChild(optionWrapper);
+                });
+
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        // Render nach DOM-Load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => renderForm(specs));
+        } else {
+            renderForm(specs);
+        }
+    <`+`/script>
+</body>
+</html>`;
     }
 </script>
 </body>
