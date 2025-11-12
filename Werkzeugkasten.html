@@ -1515,12 +1515,12 @@ formBuilder.addEventListener('drop', (e) => {
           let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
           let html = new HtmlObj();
           if (fields != null && fields instanceof Array && fields.length > 0){
-              fields.forEach(html.append());
+              fields.forEach(field => html.append(field));
           }
 
           let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
           if (scripts != null && scripts instanceof Array && scripts.length > 0){
-              scripts.forEach(html.append());
+              scripts.forEach(script => html.append(script));
           }
 
           return html.finish();
@@ -1567,15 +1567,15 @@ formBuilder.addEventListener('drop', (e) => {
           }
 
           append(jsonHtml){
-              if(jsonHtml != null && jsonHtml instanceof JSON && jsonHtml.has("html")){
-                  if (jsonHtml.has("type") && jsonHtml["type"] === "header"){
-                      this.htmlHeader += jsonHtml["html"];
+              if(jsonHtml != null && typeof jsonHtml === 'object' && jsonHtml.html){
+                  if (jsonHtml.type && jsonHtml.type === "header"){
+                      this.htmlHeader += jsonHtml.html;
                   }
-                  else if (jsonHtml.has("type") && jsonHtml["type"] === "body") {
-                      this.htmlBody += jsonHtml["html"];
+                  else if (jsonHtml.type && jsonHtml.type === "body") {
+                      this.htmlBody += jsonHtml.html;
                   }
-                  else if (jsonHtml.has("type") && jsonHtml["type"] === "footer") {
-                      this.htmlFooter += jsonHtml["html"];
+                  else if (jsonHtml.type && jsonHtml.type === "footer") {
+                      this.htmlFooter += jsonHtml.html;
                   }
               }
               return this;
