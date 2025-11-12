@@ -378,6 +378,9 @@
 
         titleInput.addEventListener("input", () => {
           this.title = titleInput.value;
+          updateFieldProperties(this.instanceId, {
+              "title": titleInput.value,
+          });
         });
 
         // Zusatzinfo (Tooltip)
@@ -395,6 +398,9 @@
           } else {
             this.titleEl.removeAttribute("data-info");
           }
+          updateFieldProperties(this.instanceId, {
+              "infoText": infoInput.value,
+          });
         });
 
         config.appendChild(titleLabel);
@@ -522,6 +528,12 @@
         input.type = "text";
         input.style.width = "100%";
         input.style.boxSizing = "border-box";
+
+        input.addEventListener("input", () => {
+            updateFieldProperties(this.instanceId, {
+                "value": input.value,
+            });
+        });
 
         // Alles zusammenfügen
         wrapper.appendChild(label);
@@ -726,6 +738,12 @@
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
 
+            input.addEventListener("input", () => {
+                updateFieldProperties(this.instanceId, {
+                    "value": input.value,
+                })
+            });
+
             // Combine the ELEMENTS!!!!
             wrapper.appendChild(label);
             wrapper.appendChild(input);
@@ -763,6 +781,12 @@
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
 
+            input.addEventListener("input", () => {
+                updateFieldProperties(this.instanceId, {
+                    "value": input.value,
+                });
+            });
+
             // Combine the ELEMENTS!!!!
             wrapper.appendChild(label);
             wrapper.appendChild(input);
@@ -778,7 +802,7 @@
                 title: this.title,         // gespeicherter individueller Titel
                 infoText: this.infoText,   // gespeicherter Tooltip
                 required: this.required,
-                content: this.value,
+                value: this.value,
                 x: rect.left - parentRect.left,
                 y: rect.top - parentRect.top
             };
@@ -794,7 +818,7 @@
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
             this.createPictureInput();
-            this.uploadPicture()
+            this.uploadPicture();
             updateField(this);
         }
 
@@ -829,6 +853,9 @@
                     upload = event.target.result;
                     id.bodyEl.children[1].children[2].src = base64String
                     console.log(id.bodyEl.children[1].children[2].src)
+                    updateFieldProperties(this.instanceId, {
+                        "value": base64String,
+                    });
                 };
                 reader.readAsDataURL(file);
             }
@@ -920,6 +947,12 @@
             input.type = "number";
             input.style.width = "100%";
             input.style.boxSizing = "border-box";
+
+            input.addEventListener("input", () => {
+                updateFieldProperties(this.instanceId, {
+                    "value": input.value,
+                });
+            });
 
             // Combine the ELEMENTS!!!!
             wrapper.appendChild(label);
