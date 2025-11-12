@@ -1513,9 +1513,10 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function exportBuilder(){
+        let title = document.getElementById("title")
         let formLink = document.createElement('a');
-        formLink.href = URL.createObjectURL(new File([getFormBlob()], "form.html"));
-        formLink.download = 'form.html';
+        formLink.href = URL.createObjectURL(new File([getFormBlob()], `${title}.html`));
+        formLink.download = `${title}.html`;
         formLink.click();
 
         let auswertungLink = document.createElement('a');
@@ -1655,11 +1656,13 @@ formBuilder.addEventListener('drop', (e) => {
   </script>
   <script>
 function createAuswertungHTML() {
+    let titel = document.getElementById("titel").value
+    let logo = document.getElementById("logo")
     return `<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Auswertung</title>
+    <title>${titel}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1822,7 +1825,7 @@ function createAuswertungHTML() {
 <body>
 <div class="container">
     <div class="title-box">
-        <h1>Auswertung</h1>
+        <h1>${titel}</h1>
     </div>
 
     <div class="upload-box">
@@ -2136,7 +2139,7 @@ function createAuswertungHTML() {
             printWindow.document.open();
             const htmlContent = '<html lang="De">\\n' +
                 '<head>\\n' +
-                '<title>Auswertung</title>\\n' +
+                '<title>${titel}</title>\\n' +
                 '<style>\\n' +
                 'body { font-family: Arial, sans-serif; }\\n' +
                 'h1 { color: #333; }\\n' +
@@ -2148,7 +2151,7 @@ function createAuswertungHTML() {
                 '</style>\\n' +
                 '</head>\\n' +
                 '<body>\\n' +
-                '<h1>Auswertung</h1>\\n' +
+                '<h1>${titel}</h1>\\n' +
                 table +
                 '</body>\\n' +
                 '</html>';
@@ -2183,7 +2186,7 @@ function createAuswertungHTML() {
 
             let temp_link = document.createElement('a');
 
-            temp_link.download = \`Auswertung.csv\`;
+            temp_link.download = \`${titel}.csv\`;
         let url = window.URL.createObjectURL(CSVFile);
         temp_link.href = url;
 
