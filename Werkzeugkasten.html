@@ -2172,29 +2172,298 @@ function getAuswertungBlob() {
             max-width: 100%;
             height: auto;
         }
+        .upload-box {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .upload-btn {
+            background-color: #04AA6D;
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        .upload-btn:hover {
+            background-color: #3e8e41;
+        }
+        .submit-btn {
+            background-color: #007bff;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <div class="title-box">
         <h1>${specs["vars"]["title"]}</h1>
         <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
-        </div>
+    </div>
     <div class="upload-box">
-        <!--button class="upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button-->
+        <button class="upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
         <button class="upload-btn submit-btn" onclick="exportFormAsZip()">Formular als ZIP exportieren</button>
-
     </div>
     <div id="form-builder"></div>
     <script>
         const specs = ${JSON.stringify(specs)};
+        let uploadedFiles = {};
 
     function exportSpecs() {
         let jsonLink = document.createElement('a');
         console.log(specs);
-        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(specs)], {type: 'application/json'})], "specs.json"));
         jsonLink.download = 'specs.json';
         jsonLink.click();
     }
+
+    // ZIP-Erstellung Funktionen (ohne externe Bibliotheken)
+    function createZipFile(files) {
+        const zipParts = [];
+        const centralDirectory = [];
+        let offset = 0;
+
+        files.forEach(file => {
+            const fileData = file.data;
+            const fileName = file.name;
+            const fileNameBytes = new TextEncoder().encode(fileName);
+            
+            // Local file header signature
+            const localFileHeader = new Uint8Array(30 + fileNameBytes.length);
+            const view = new DataView(localFileHeader.buffer);
+            
+            view.setUint32(0, 0x04034b50, true); // Local file header signature
+            view.setUint16(4, 20, true); // Version needed to extract
+            view.setUint16(6, 0, true); // General purpose bit flag
+            view.setUint16(8, 0, true); // Compression method (0 = no compression)
+            view.setUint16(10, 0, true); // File last modification time
+            view.setUint16(12, 0, true); // File last modification date
+            view.setUint32(14, crc32(fileData), true); // CRC-32
+            view.setUint32(18, fileData.length, true); // Compressed size
+            view.setUint32(22, fileData.length, true); // Uncompressed size
+            view.setUint16(26, fileNameBytes.length, true); // File name length
+            view.setUint16(28, 0, true); // Extra field length
+            
+            localFileHeader.set(fileNameBytes, 30);
+            
+            zipParts.push(localFileHeader);
+            zipParts.push(fileData);
+            
+            // Central directory header
+            const centralDirHeader = new Uint8Array(46 + fileNameBytes.length);
+            const cdView = new DataView(centralDirHeader.buffer);
+            
+            cdView.setUint32(0, 0x02014b50, true); // Central directory signature
+            cdView.setUint16(4, 20, true); // Version made by
+            cdView.setUint16(6, 20, true); // Version needed to extract
+            cdView.setUint16(8, 0, true); // General purpose bit flag
+            cdView.setUint16(10, 0, true); // Compression method
+            cdView.setUint16(12, 0, true); // File last modification time
+            cdView.setUint16(14, 0, true); // File last modification date
+            cdView.setUint32(16, crc32(fileData), true); // CRC-32
+            cdView.setUint32(20, fileData.length, true); // Compressed size
+            cdView.setUint32(24, fileData.length, true); // Uncompressed size
+            cdView.setUint16(28, fileNameBytes.length, true); // File name length
+            cdView.setUint16(30, 0, true); // Extra field length
+            cdView.setUint16(32, 0, true); // File comment length
+            cdView.setUint16(34, 0, true); // Disk number start
+            cdView.setUint16(36, 0, true); // Internal file attributes
+            cdView.setUint32(38, 0, true); // External file attributes
+            cdView.setUint32(42, offset, true); // Relative offset of local header
+            
+            centralDirHeader.set(fileNameBytes, 46);
+            centralDirectory.push(centralDirHeader);
+            
+            offset += localFileHeader.length + fileData.length;
+        });
+        
+        const centralDirData = new Uint8Array(centralDirectory.reduce((sum, cd) => sum + cd.length, 0));
+        let cdOffset = 0;
+        centralDirectory.forEach(cd => {
+            centralDirData.set(cd, cdOffset);
+            cdOffset += cd.length;
+        });
+        
+        zipParts.push(centralDirData);
+        
+        // End of central directory record
+        const endOfCentralDir = new Uint8Array(22);
+        const eocdView = new DataView(endOfCentralDir.buffer);
+        
+        eocdView.setUint32(0, 0x06054b50, true); // End of central dir signature
+        eocdView.setUint16(4, 0, true); // Number of this disk
+        eocdView.setUint16(6, 0, true); // Disk where central directory starts
+        eocdView.setUint16(8, files.length, true); // Number of central directory records on this disk
+        eocdView.setUint16(10, files.length, true); // Total number of central directory records
+        eocdView.setUint32(12, centralDirData.length, true); // Size of central directory
+        eocdView.setUint32(16, offset, true); // Offset of start of central directory
+        eocdView.setUint16(20, 0, true); // Comment length
+        
+        zipParts.push(endOfCentralDir);
+        
+        return new Blob(zipParts, { type: 'application/zip' });
+    }
+
+    function crc32(data) {
+        const table = new Uint32Array(256);
+        for (let i = 0; i < 256; i++) {
+            let c = i;
+            for (let j = 0; j < 8; j++) {
+                c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            }
+            table[i] = c;
+        }
+        
+        let crc = 0xFFFFFFFF;
+        for (let i = 0; i < data.length; i++) {
+            crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+        }
+        return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+
+   async function exportFormAsZip() {
+    try {
+        // Validierung der Pflichtfelder
+        const validationResult = validateRequiredFields();
+        if (!validationResult.valid) {
+            alert('Bitte füllen Sie alle Pflichtfelder aus:\\n\\n' + validationResult.missingFields.join('\\n'));
+            return;
+        }
+
+        const formData = await collectFormData();
+        const files = [];
+        
+        // JSON-Datei hinzufügen
+        const jsonString = JSON.stringify(formData, null, 2);
+        const jsonBytes = new TextEncoder().encode(jsonString);
+        files.push({
+            name: 'formular.json',
+            data: jsonBytes
+        });
+        
+        // Hochgeladene Dateien hinzufügen
+        for (const [fileName, fileData] of Object.entries(uploadedFiles)) {
+            files.push({
+                name: fileName,
+                data: fileData
+            });
+        }
+        
+        const zipBlob = createZipFile(files);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = '${specs["vars"]["title"] || "formular"}_ausgefuellt.zip';
+        link.click();
+        
+        alert('Formular erfolgreich als ZIP exportiert!');
+    } catch (error) {
+        console.error('Fehler beim Export:', error);
+        alert('Fehler beim Exportieren des Formulars: ' + error.message);
+    }
+}
+
+function validateRequiredFields() {
+    const formSpecs = specs.form.fields;
+    const missingFields = [];
+    
+    for (let i = 0; i < formSpecs.length; i++) {
+        const fieldSpec = formSpecs[i];
+        
+        // Überspringe nicht-Pflichtfelder und InfoFelder
+        if (!fieldSpec.config.required || fieldSpec.class === 'InfoField' || fieldSpec.class === 'PictureField') {
+            continue;
+        }
+        
+        const fieldId = fieldSpec.config.id;
+        const fieldElement = document.getElementById('field_' + fieldId);
+        const fieldTitle = fieldSpec.config.title || fieldSpec.class || 'Unbekanntes Feld';
+        
+        let isEmpty = false;
+        
+        if (fieldSpec.class === 'Textfield' || fieldSpec.class === 'NumberField' || fieldSpec.class === 'DateField') {
+            isEmpty = !fieldElement || !fieldElement.value || fieldElement.value.trim() === '';
+        } else if (fieldSpec.class === 'DropDownfield') {
+            isEmpty = !fieldElement || !fieldElement.value;
+        } else if (fieldSpec.class === 'FileField') {
+            isEmpty = !fieldElement || !fieldElement.files || fieldElement.files.length === 0;
+        } else if (fieldSpec.class === 'Radio_MultipleChoicefield') {
+            if (fieldSpec.config.allowMultiple) {
+                const checkboxes = document.querySelectorAll('input[name="field_' + fieldId + '"]:checked');
+                isEmpty = checkboxes.length === 0;
+            } else {
+                const radio = document.querySelector('input[name="field_' + fieldId + '"]:checked');
+                isEmpty = !radio;
+            }
+        }
+        
+        if (isEmpty) {
+            missingFields.push('- ' + fieldTitle);
+        }
+    }
+    
+    return {
+        valid: missingFields.length === 0,
+        missingFields: missingFields
+    };
+}
+
+async function collectFormData() {
+    const formSpecs = specs.form.fields;
+    const result = {
+        form: {
+            fields: []
+        }
+    };
+    
+    for (let i = 0; i < formSpecs.length; i++) {
+        const fieldSpec = formSpecs[i];
+        const fieldId = fieldSpec.config.id;
+        const fieldElement = document.getElementById('field_' + fieldId);
+        
+        let value = null;
+        
+        if (fieldSpec.class === 'Textfield' || fieldSpec.class === 'NumberField' || fieldSpec.class === 'DateField') {
+            value = fieldElement ? fieldElement.value : '';
+        } else if (fieldSpec.class === 'DropDownfield') {
+            value = fieldElement ? fieldElement.value : '';
+        } else if (fieldSpec.class === 'FileField') {
+            if (fieldElement && fieldElement.files && fieldElement.files[0]) {
+                const file = fieldElement.files[0];
+                const arrayBuffer = await file.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+                uploadedFiles[file.name] = uint8Array;
+                value = file.name;
+            }
+        } else if (fieldSpec.class === 'Radio_MultipleChoicefield') {
+            if (fieldSpec.config.allowMultiple) {
+                const checkboxes = document.querySelectorAll('input[name="field_' + fieldId + '"]:checked');
+                value = Array.from(checkboxes).map(cb => cb.value);
+            } else {
+                const radio = document.querySelector('input[name="field_' + fieldId + '"]:checked');
+                value = radio ? radio.value : '';
+            }
+        } else if (fieldSpec.class === 'InfoField' || fieldSpec.class === 'PictureField') {
+            value = fieldSpec.config.value;
+        }
+        
+        result.form.fields.push({
+            class: fieldSpec.class,
+            config: {
+                ...fieldSpec.config,
+                value: value
+            }
+        });
+    }
+    
+    return result;
+}
 
         function renderForm(givenSpecs, formType = "form") {
             const container = document.getElementById("form-builder");
