@@ -1407,15 +1407,15 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function exportBuilder(){
-        let title = document.getElementById("title")
+        let title = document.getElementById("titel").value
         let formLink = document.createElement('a');
-        formLink.href = URL.createObjectURL(new File([getFormBlob()], `${title}.html`));
-        formLink.download = `${title}.html`;
+        formLink.href = URL.createObjectURL(new File([getFormBlob()], `${title}-Formular.html`));
+        formLink.download = `${title}-Formular.html`;
         formLink.click();
 
         let auswertungLink = document.createElement('a');
         auswertungLink.href = URL.createObjectURL(new File([getAuswertungBlob()], "auswertung.html"));
-        auswertungLink.download = 'auswertung.html';
+        auswertungLink.download = `${title}-Auswertung.html`;
         auswertungLink.click();
 }
 
