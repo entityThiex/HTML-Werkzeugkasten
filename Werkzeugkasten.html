@@ -1523,8 +1523,7 @@ formBuilder.addEventListener('drop', (e) => {
   </script>
   <script>
 function createAuswertungHTML() {
-    let titel = document.getElementById("titel").value
-    let logo = document.getElementById("logo")
+    let titel = specs.vars.title || "Auswertung";
     return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -2076,16 +2075,29 @@ function getAuswertungBlob() {
   </script>
 <script>
     function returnFormHtml(specs){
-        return "<!DOCTYPE html>\n" +
+    return "<!DOCTYPE html>\n" +
         "<html lang=\"de\">\n" +
         "<head>\n" +
         "    <meta charset=\"UTF-8\">\n" +
-        "    <title>Formular</title>\n" +
+        "    <title>"+specs.vars.title+"</title>\n" +
         "    <style>\n" +
         "        body {\n" +
         "            font-family: Arial, sans-serif;\n" +
         "            margin: 20px;\n" +
         "            background: #f0f0f0;\n" +
+        "        }\n" +
+        "        .container {\n" +
+        "            max-width: 800px;\n" +
+        "            margin: 0 auto;\n" +
+        "            background: white;\n" +
+        "            padding: 30px;\n" +
+        "            border-radius: 8px;\n" +
+        "            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n" +
+        "        }\n" +
+        "        h1 {\n" +
+        "            text-align: center;\n" +
+        "            color: #007bff;\n" +
+        "            margin-bottom: 30px;\n" +
         "        }\n" +
         "        .field {\n" +
         "            background: #ffffff;\n" +
@@ -2094,39 +2106,24 @@ function getAuswertungBlob() {
         "            box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n" +
         "            margin-bottom: 15px;\n" +
         "            padding: 15px;\n" +
-        "        }\n" +
-        "        .field-header {\n" +
-        "            background: #007bff;\n" +
-        "            color: #fff;\n" +
-        "            padding: 8px 10px;\n" +
-        "            display: flex;\n" +
-        "            align-items: center;\n" +
-        "            justify-content: space-between;\n" +
-        "            border-radius: 6px 6px 0 0;\n" +
-        "            margin: -15px -15px 10px -15px;\n" +
-        "        }\n" +
-        "        .field-title {\n" +
-        "            font-size: 14px;\n" +
-        "            font-weight: bold;\n" +
-        "        }\n" +
-        "        .field-required {\n" +
-        "            display: flex;\n" +
-        "            align-items: center;\n" +
-        "            gap: 4px;\n" +
-        "            font-size: 12px;\n" +
-        "        }\n" +
-        "        .field-required-indicator {\n" +
-        "            color: #ffeb3b;\n" +
-        "            font-size: 14px;\n" +
+        "            position: relative;\n" +
         "        }\n" +
         "        .field-body {\n" +
-        "            padding: 10px 0;\n" +
+        "            padding: 0;\n" +
         "        }\n" +
         "        label {\n" +
         "            display: block;\n" +
         "            margin-bottom: 4px;\n" +
         "            font-size: 14px;\n" +
         "            font-weight: bold;\n" +
+        "        }\n" +
+        "        .required-indicator {\n" +
+        "            position: absolute;\n" +
+        "            top: 15px;\n" +
+        "            right: 15px;\n" +
+        "            color: #000000;\n" +
+        "            font-size: 12px;\n" +
+        "            font-weight: normal;\n" +
         "        }\n" +
         "        input, textarea, select {\n" +
         "            width: 100%;\n" +
@@ -2136,16 +2133,61 @@ function getAuswertungBlob() {
         "            border: 1px solid #ccc;\n" +
         "            border-radius: 4px;\n" +
         "        }\n" +
+        "        input:focus, textarea:focus, select:focus {\n" +
+        "            outline: none;\n" +
+        "            border-color: #007bff;\n" +
+        "        }\n" +
         "        img {\n" +
         "            max-width: 100%;\n" +
         "            height: auto;\n" +
         "        }\n" +
+        "        .submit-btn {\n" +
+        "            background-color: #04AA6D;\n" +
+        "            color: white;\n" +
+        "            padding: 16px 32px;\n" +
+        "            font-size: 16px;\n" +
+        "            border: none;\n" +
+        "            border-radius: 4px;\n" +
+        "            cursor: pointer;\n" +
+        "            width: 100%;\n" +
+        "            margin-top: 20px;\n" +
+        "            transition: background-color 0.3s;\n" +
+        "        }\n" +
+        "        .submit-btn:hover {\n" +
+        "            background-color: #3e8e41;\n" +
+        "        }\n" +
+        "        .submit-btn:disabled {\n" +
+        "            background-color: #ccc;\n" +
+        "            cursor: not-allowed;\n" +
+        "        }\n" +
+        "        .error-message {\n" +
+        "            color: #ff4444;\n" +
+        "            font-size: 12px;\n" +
+        "            margin-top: 4px;\n" +
+        "            display: none;\n" +
+        "        }\n" +
+        "        .required-field {\n" +
+        "            border-color: #ff4444 !important;\n" +
+        "        }\n" +
+        "        .radio-option {\n" +
+        "            margin-top: 8px;\n" +
+        "        }\n" +
+        "        .radio-option label {\n" +
+        "            font-weight: normal;\n" +
+        "            display: inline;\n" +
+        "            margin-left: 8px;\n" +
+        "        }\n" +
         "    </style>\n" +
         "</head>\n" +
         "<body>\n" +
-        "    <div id=\"form-builder\"></div>\n" +
+        "    <div class=\"container\">\n" +
+        "        <h1>"+specs.vars.title+"</h1>\n" +
+        "        <div id=\"form-builder\"></div>\n" +
+        "        <button class=\"submit-btn\" onclick=\"saveAndDownloadZip()\">Formular absenden und herunterladen</button>\n" +
+        "    </div>\n" +
         "    <script>\n" +
         "        const specs = "+JSON.stringify(specs)+";\n" +
+        "        const uploadedFiles = new Map();\n" +
         "        \n" +
         "        function renderForm(givenSpecs, formType = \"form\") {\n" +
         "            const container = document.getElementById(\"form-builder\");\n" +
@@ -2205,39 +2247,17 @@ function getAuswertungBlob() {
         "                this.el.className = \"field\";\n" +
         "                this.el.id = String(this.instanceId);\n" +
         "\n" +
-        "                const header = document.createElement(\"div\");\n" +
-        "                header.className = \"field-header\";\n" +
-        "\n" +
-        "                const titleSpan = document.createElement(\"span\");\n" +
-        "                titleSpan.className = \"field-title\";\n" +
-        "                titleSpan.textContent = this.title || \"Feld\";\n" +
-        "                if (this.infoText) {\n" +
-        "                    titleSpan.setAttribute(\"title\", this.infoText);\n" +
-        "                }\n" +
-        "\n" +
-        "                const rightHeader = document.createElement(\"div\");\n" +
-        "                rightHeader.className = \"field-required\";\n" +
-        "                \n" +
-        "                if(this.required) {\n" +
-        "                    const cbLabel = document.createElement(\"span\");\n" +
-        "                    cbLabel.textContent = \"Pflicht\";\n" +
-        "\n" +
+        "                if (this.required) {\n" +
         "                    const reqIndicator = document.createElement(\"span\");\n" +
-        "                    reqIndicator.className = \"field-required-indicator\";\n" +
-        "                    reqIndicator.textContent = \"*\";\n" +
-        "                    \n" +
-        "                    rightHeader.appendChild(cbLabel);\n" +
-        "                    rightHeader.appendChild(reqIndicator);\n" +
+        "                    reqIndicator.className = \"required-indicator\";\n" +
+        "                    reqIndicator.textContent = \"Pflicht*\";\n" +
+        "                    this.el.appendChild(reqIndicator);\n" +
         "                }\n" +
-        "\n" +
-        "                header.appendChild(titleSpan);\n" +
-        "                header.appendChild(rightHeader);\n" +
         "\n" +
         "                const body = document.createElement(\"div\");\n" +
         "                body.className = \"field-body\";\n" +
         "                this.bodyEl = body;\n" +
         "\n" +
-        "                this.el.appendChild(header);\n" +
         "                this.el.appendChild(body);\n" +
         "                container.appendChild(this.el);\n" +
         "            }\n" +
@@ -2257,9 +2277,16 @@ function getAuswertungBlob() {
         "                const input = document.createElement(\"input\");\n" +
         "                input.type = \"text\";\n" +
         "                input.id = \"field_\" + this.instanceId;\n" +
+        "                input.dataset.fieldId = this.instanceId;\n" +
+        "                input.dataset.required = this.required;\n" +
+        "\n" +
+        "                const errorMsg = document.createElement(\"div\");\n" +
+        "                errorMsg.className = \"error-message\";\n" +
+        "                errorMsg.textContent = \"Dieses Feld ist erforderlich\";\n" +
         "\n" +
         "                wrapper.appendChild(label);\n" +
         "                wrapper.appendChild(input);\n" +
+        "                wrapper.appendChild(errorMsg);\n" +
         "                this.bodyEl.appendChild(wrapper);\n" +
         "            }\n" +
         "        }\n" +
@@ -2278,6 +2305,13 @@ function getAuswertungBlob() {
         "\n" +
         "                const select = document.createElement(\"select\");\n" +
         "                select.id = \"field_\" + this.instanceId;\n" +
+        "                select.dataset.fieldId = this.instanceId;\n" +
+        "                select.dataset.required = this.required;\n" +
+        "\n" +
+        "                const defaultOption = document.createElement(\"option\");\n" +
+        "                defaultOption.value = \"\";\n" +
+        "                defaultOption.textContent = \"Bitte wählen...\";\n" +
+        "                select.appendChild(defaultOption);\n" +
         "\n" +
         "                this.options.forEach(optionText => {\n" +
         "                    const option = document.createElement(\"option\");\n" +
@@ -2286,8 +2320,13 @@ function getAuswertungBlob() {
         "                    select.appendChild(option);\n" +
         "                });\n" +
         "\n" +
+        "                const errorMsg = document.createElement(\"div\");\n" +
+        "                errorMsg.className = \"error-message\";\n" +
+        "                errorMsg.textContent = \"Bitte wählen Sie eine Option\";\n" +
+        "\n" +
         "                wrapper.appendChild(label);\n" +
         "                wrapper.appendChild(select);\n" +
+        "                wrapper.appendChild(errorMsg);\n" +
         "                this.bodyEl.appendChild(wrapper);\n" +
         "            }\n" +
         "        }\n" +
@@ -2306,9 +2345,16 @@ function getAuswertungBlob() {
         "                const input = document.createElement(\"input\");\n" +
         "                input.type = \"date\";\n" +
         "                input.id = \"field_\" + this.instanceId;\n" +
+        "                input.dataset.fieldId = this.instanceId;\n" +
+        "                input.dataset.required = this.required;\n" +
+        "\n" +
+        "                const errorMsg = document.createElement(\"div\");\n" +
+        "                errorMsg.className = \"error-message\";\n" +
+        "                errorMsg.textContent = \"Dieses Feld ist erforderlich\";\n" +
         "\n" +
         "                wrapper.appendChild(label);\n" +
         "                wrapper.appendChild(input);\n" +
+        "                wrapper.appendChild(errorMsg);\n" +
         "                this.bodyEl.appendChild(wrapper);\n" +
         "            }\n" +
         "        }\n" +
@@ -2365,9 +2411,22 @@ function getAuswertungBlob() {
         "                const input = document.createElement(\"input\");\n" +
         "                input.type = \"file\";\n" +
         "                input.id = \"field_\" + this.instanceId;\n" +
+        "                input.dataset.fieldId = this.instanceId;\n" +
+        "                input.dataset.required = this.required;\n" +
+        "                input.multiple = true;\n" +
+        "\n" +
+        "                input.addEventListener('change', (e) => {\n" +
+        "                    const files = Array.from(e.target.files);\n" +
+        "                    uploadedFiles.set(this.instanceId, files);\n" +
+        "                });\n" +
+        "\n" +
+        "                const errorMsg = document.createElement(\"div\");\n" +
+        "                errorMsg.className = \"error-message\";\n" +
+        "                errorMsg.textContent = \"Bitte wählen Sie eine Datei\";\n" +
         "\n" +
         "                wrapper.appendChild(label);\n" +
         "                wrapper.appendChild(input);\n" +
+        "                wrapper.appendChild(errorMsg);\n" +
         "                this.bodyEl.appendChild(wrapper);\n" +
         "            }\n" +
         "        }\n" +
@@ -2386,9 +2445,16 @@ function getAuswertungBlob() {
         "                const input = document.createElement(\"input\");\n" +
         "                input.type = \"number\";\n" +
         "                input.id = \"field_\" + this.instanceId;\n" +
+        "                input.dataset.fieldId = this.instanceId;\n" +
+        "                input.dataset.required = this.required;\n" +
+        "\n" +
+        "                const errorMsg = document.createElement(\"div\");\n" +
+        "                errorMsg.className = \"error-message\";\n" +
+        "                errorMsg.textContent = \"Dieses Feld ist erforderlich\";\n" +
         "\n" +
         "                wrapper.appendChild(label);\n" +
         "                wrapper.appendChild(input);\n" +
+        "                wrapper.appendChild(errorMsg);\n" +
         "                this.bodyEl.appendChild(wrapper);\n" +
         "            }\n" +
         "        }\n" +
@@ -2409,39 +2475,166 @@ function getAuswertungBlob() {
         "\n" +
         "                this.options.forEach((optionText, index) => {\n" +
         "                    const optionWrapper = document.createElement(\"div\");\n" +
-        "                    optionWrapper.style.marginTop = \"8px\";\n" +
+        "                    optionWrapper.className = \"radio-option\";\n" +
         "\n" +
         "                    const input = document.createElement(\"input\");\n" +
         "                    input.type = this.allowMultiple ? \"checkbox\" : \"radio\";\n" +
         "                    input.id = \"field_\" + this.instanceId + \"_\" + index;\n" +
         "                    input.name = \"field_\" + this.instanceId;\n" +
         "                    input.value = optionText;\n" +
+        "                    input.dataset.fieldId = this.instanceId;\n" +
+        "                    input.dataset.required = this.required;\n" +
         "\n" +
         "                    const optionLabel = document.createElement(\"label\");\n" +
         "                    optionLabel.htmlFor = input.id;\n" +
         "                    optionLabel.textContent = optionText;\n" +
-        "                    optionLabel.style.marginLeft = \"8px\";\n" +
-        "                    optionLabel.style.fontWeight = \"normal\";\n" +
         "\n" +
         "                    optionWrapper.appendChild(input);\n" +
         "                    optionWrapper.appendChild(optionLabel);\n" +
         "                    wrapper.appendChild(optionWrapper);\n" +
         "                });\n" +
         "\n" +
+        "                const errorMsg = document.createElement(\"div\");\n" +
+        "                errorMsg.className = \"error-message\";\n" +
+        "                errorMsg.textContent = \"Bitte wählen Sie mindestens eine Option\";\n" +
+        "                wrapper.appendChild(errorMsg);\n" +
+        "\n" +
         "                this.bodyEl.appendChild(wrapper);\n" +
         "            }\n" +
         "        }\n" +
         "        \n" +
-        "        // Render nach DOM-Load\n" +
+        "        function validateForm() {\n" +
+        "            let isValid = true;\n" +
+        "            const fields = document.querySelectorAll('[data-required=\"true\"]');\n" +
+        "            \n" +
+        "            fields.forEach(field => {\n" +
+        "                const errorMsg = field.parentElement.querySelector('.error-message');\n" +
+        "                \n" +
+        "                if (field.type === 'radio' || field.type === 'checkbox') {\n" +
+        "                    const fieldId = field.dataset.fieldId;\n" +
+        "                    const groupFields = document.querySelectorAll(`[data-field-id=\"${fieldId}\"]`);\n" +
+        "                    const isChecked = Array.from(groupFields).some(f => f.checked);\n" +
+        "                    \n" +
+        "                    if (!isChecked) {\n" +
+        "                        isValid = false;\n" +
+        "                        if (errorMsg) errorMsg.style.display = 'block';\n" +
+        "                    } else {\n" +
+        "                        if (errorMsg) errorMsg.style.display = 'none';\n" +
+        "                    }\n" +
+        "                } else if (field.type === 'file') {\n" +
+        "                    const fieldId = field.dataset.fieldId;\n" +
+        "                    if (!uploadedFiles.has(parseInt(fieldId)) || uploadedFiles.get(parseInt(fieldId)).length === 0) {\n" +
+        "                        isValid = false;\n" +
+        "                        field.classList.add('required-field');\n" +
+        "                        if (errorMsg) errorMsg.style.display = 'block';\n" +
+        "                    } else {\n" +
+        "                        field.classList.remove('required-field');\n" +
+        "                        if (errorMsg) errorMsg.style.display = 'none';\n" +
+        "                    }\n" +
+        "                } else {\n" +
+        "                    if (!field.value || field.value.trim() === '') {\n" +
+        "                        isValid = false;\n" +
+        "                        field.classList.add('required-field');\n" +
+        "                        if (errorMsg) errorMsg.style.display = 'block';\n" +
+        "                    } else {\n" +
+        "                        field.classList.remove('required-field');\n" +
+        "                        if (errorMsg) errorMsg.style.display = 'none';\n" +
+        "                    }\n" +
+        "                }\n" +
+        "            });\n" +
+        "            \n" +
+        "            return isValid;\n" +
+        "        }\n" +
+        "        \n" +
+        "        function collectFormData() {\n" +
+        "            const formData = JSON.parse(JSON.stringify(specs));\n" +
+        "            \n" +
+        "            formData.form.fields.forEach(fieldSpec => {\n" +
+        "                const fieldId = fieldSpec.config.id;\n" +
+        "                const fieldType = fieldSpec.class;\n" +
+        "                \n" +
+        "                if (fieldType === 'InfoField' || fieldType === 'PictureField') {\n" +
+        "                    return;\n" +
+        "                }\n" +
+        "                \n" +
+        "                if (fieldType === 'Radio_MultipleChoicefield') {\n" +
+        "                    const inputs = document.querySelectorAll(`[data-field-id=\"${fieldId}\"]`);\n" +
+        "                    const checkedValues = Array.from(inputs)\n" +
+        "                        .filter(input => input.checked)\n" +
+        "                        .map(input => input.value);\n" +
+        "                    fieldSpec.config.value = fieldSpec.config.allowMultiple ? checkedValues : (checkedValues[0] || '');\n" +
+        "                } else if (fieldType === 'FileField') {\n" +
+        "                    const files = uploadedFiles.get(fieldId) || [];\n" +
+        "                    fieldSpec.config.value = files.map(f => f.name).join(', ');\n" +
+        "                    fieldSpec.config.fileNames = files.map(f => f.name);\n" +
+        "                } else {\n" +
+        "                    const input = document.querySelector(`#field_${fieldId}`);\n" +
+        "                    if (input) {\n" +
+        "                        fieldSpec.config.value = input.value;\n" +
+        "                    }\n" +
+        "                }\n" +
+        "            });\n" +
+        "            \n" +
+        "            return formData;\n" +
+        "        }\n" +
+        "        \n" +
+        "        async function saveAndDownloadZip() {\n" +
+        "            if (!validateForm()) {\n" +
+        "                alert('Bitte füllen Sie alle Pflichtfelder aus.');\n" +
+        "                return;\n" +
+        "            }\n" +
+        "            \n" +
+        "            const submitBtn = document.querySelector('.submit-btn');\n" +
+        "            submitBtn.disabled = true;\n" +
+        "            submitBtn.textContent = 'Wird erstellt...';\n" +
+        "            \n" +
+        "            try {\n" +
+        "                const formData = collectFormData();\n" +
+        "                const jsonString = JSON.stringify(formData, null, 2);\n" +
+        "                \n" +
+        "                const zip = new JSZip();\n" +
+        "                \n" +
+        "                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);\n" +
+        "                zip.file(`formular_${timestamp}.json`, jsonString);\n" +
+        "                \n" +
+        "                for (const [fieldId, files] of uploadedFiles.entries()) {\n" +
+        "                    const folderName = `files_field_${fieldId}`;\n" +
+        "                    for (const file of files) {\n" +
+        "                        const arrayBuffer = await file.arrayBuffer();\n" +
+        "                         zip.file(file.name, arrayBuffer);\n" +
+        "                    }\n" +
+        "                }\n" +
+        "                \n" +
+        "                const zipBlob = await zip.generateAsync({type: 'blob'});\n" +
+        "                \n" +
+        "                const link = document.createElement('a');\n" +
+        "                link.href = URL.createObjectURL(zipBlob);\n" +
+        "                link.download = `formular_${timestamp}.zip`;\n" +
+        "                link.click();\n" +
+        "                \n" +
+        "                submitBtn.textContent = 'Erfolgreich heruntergeladen!';\n" +
+        "                setTimeout(() => {\n" +
+        "                    submitBtn.disabled = false;\n" +
+        "                    submitBtn.textContent = 'Formular absenden und herunterladen';\n" +
+        "                }, 3000);\n" +
+        "            } catch (error) {\n" +
+        "                console.error('Fehler beim Erstellen der ZIP:', error);\n" +
+        "                alert('Fehler beim Erstellen der ZIP-Datei: ' + error.message);\n" +
+        "                submitBtn.disabled = false;\n" +
+        "                submitBtn.textContent = 'Formular absenden und herunterladen';\n" +
+        "            }\n" +
+        "        }\n" +
+        "        \n" +
         "        if (document.readyState === 'loading') {\n" +
         "            document.addEventListener('DOMContentLoaded', () => renderForm(specs));\n" +
         "        } else {\n" +
         "            renderForm(specs);\n" +
         "        }\n" +
         "    <"+"/script>\n" +
+        "    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js\"><"+"/script>\n" +
         "</body>\n" +
         "</html>";
-    }
+}
 </script>
 </body>
 </html>
