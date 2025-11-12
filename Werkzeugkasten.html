@@ -1483,11 +1483,6 @@ formBuilder.addEventListener('drop', (e) => {
         formLink.download = 'form.html';
         formLink.click();
 
-        let evalLink = document.createElement('a');
-        evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
-        evalLink.download = 'eval.html';
-        evalLink.click();
-
         let auswertungLink = document.createElement('a');
         auswertungLink.href = URL.createObjectURL(new File([getAuswertungBlob()], "auswertung.html"));
         auswertungLink.download = 'auswertung.html';
