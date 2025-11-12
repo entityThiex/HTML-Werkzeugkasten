@@ -908,6 +908,7 @@
         multipleChoice.addEventListener("change", () => {
             this.allowMultiple = multipleChoice.checked;
             this.updateOptionsPreview();
+            updateFieldProperties(this.instanceId, {allowMultiple: this.allowMultiple})
         });
 
         multipleChoiceContainer.appendChild(multipleChoice);
