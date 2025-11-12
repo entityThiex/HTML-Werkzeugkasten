@@ -1444,11 +1444,6 @@ formBuilder.addEventListener('drop', (e) => {
           return htmlForm.getDownloadFile();
       }
 
-      function getEvalBlob(){
-          let htmlEval = createEvalFromJson();
-          return htmlEval.getDownloadFile();
-      }
-
       class Obj{
           constructor() {
 
@@ -1700,7 +1695,7 @@ function createAuswertungHTML() {
 <div class="container">
     <div class="title-box">
         <h1>${title}</h1>
-        <img src="${specs["vars"]["image"]}" alt="Logo" height="100" width=auto></img>
+        <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
     </div>
 
     <div class="upload-box">
@@ -1722,6 +1717,8 @@ function createAuswertungHTML() {
             </div>
         </div>
 
+        <button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
+
         <div class="file-info" id="fileInfo"></div>
         <div class="error-message" id="errorMessage"></div>
         <div class="success-message" id="successMessage"></div>
@@ -1739,6 +1736,15 @@ function createAuswertungHTML() {
     let fieldTitles = [];
 
     let specs = ${JSON.stringify(specs)};
+
+
+    function exportSpecs() {
+        let jsonLink = document.createElement('a');
+        console.log(specs);
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], 'application/json')], "specs.json"));
+        jsonLink.download = 'specs.json';
+        jsonLink.click();
+    }
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const files = e.target.files;
@@ -2168,7 +2174,7 @@ function getAuswertungBlob() {
 <body>
     <div class="title-box">
         <h1>${specs["vars"]["title"]}</h1>
-        <img src="${specs["vars"]["image"]}" alt="Logo" height="100" width=auto></img>
+        <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
         </div>
     <div id="form-builder"></div>
     <script>
