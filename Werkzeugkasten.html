@@ -609,6 +609,7 @@
             if (input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -617,6 +618,7 @@
             if (e.key === "Enter" && input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -825,7 +827,6 @@
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
             this.createPictureInput();
-            this.uploadPicture()
             updateField(this);
         }
 
@@ -860,6 +861,7 @@
                     upload = event.target.result;
                     id.bodyEl.children[1].children[2].src = base64String
                     console.log(id.bodyEl.children[1].children[2].src)
+                    id.repositionAllFields();
                 };
                 reader.readAsDataURL(file);
             }
@@ -875,22 +877,6 @@
             wrapper.appendChild(input);
             wrapper.appendChild(img)
             this.bodyEl.appendChild(wrapper);
-        }
-
-        uploadPicture() {
-            console.log(this.bodyEl.children[0])
-            console.log(this.bodyEl.children[0].children[1])
-            this.bodyEl.children[0].children[1].addEventListener("change", function () {
-                console.log("test")
-                let file = this.files[0];
-                let reader = new FileReader();
-
-                reader.onload = function (event) {
-                    let base64String = event.target.result;
-                    console.log(base64String);
-                };
-                reader.readAsDataURL(file);
-            });
         }
 
     }
@@ -1031,6 +1017,7 @@
             if (input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -1039,6 +1026,7 @@
             if (e.key === "Enter" && input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
