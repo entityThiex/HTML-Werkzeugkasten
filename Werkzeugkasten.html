@@ -850,9 +850,10 @@
 
 
     class PictureField extends BaseField {
-
+        //speichern im Base64-Format
         picture64 = null
 
+        //Konstruktor ruft Basisklasse auf und setzt Feldtyp fest
         constructor(options){
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
@@ -862,7 +863,7 @@
 
         createPictureInput() {
             const wrapper = document.createElement("div");
-            let upload = this.picture64
+            let upload = this.pircture64; //Lokale Kopie des gespeicherten Base64-Strings
 
             // Label
             const label = document.createElement("label");
@@ -871,6 +872,7 @@
             label.style.marginBottom = "4px";
             label.style.fontSize = "12px";
 
+            //Bild-Preview-Element
             const img = document.createElement("img")
             img.src = "#"
             img.alt = "Preview"
@@ -879,6 +881,8 @@
             const input = document.createElement("input");
             input.type = "file";
             input.accept = "image/*";
+
+            //Upload wird als Base64 eingelesen, gespeichert und Preview aktualisiert
             const id = this;
             input.onchange = function () {
                 console.log("test");
@@ -1101,12 +1105,14 @@
         inputPreview.style.cursor = "default";
         inputPreview.onclick = (e) => e.preventDefault();
 
+        //Layout
         const optionText = document.createElement("span");
         optionText.textContent = text;
         optionText.style.fontSize = "12px";
         optionText.style.flex = "1";
         optionText.style.pointerEvents = "none";
 
+        //Delete Button Format
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "×";
         deleteButton.style.padding = "2px 6px";
