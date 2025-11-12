@@ -231,7 +231,7 @@
 
       <div class="rightMenu">
           <label>
-              <input type="text" placeholder="Titel" id="titel" class="title">
+              <input type="text" placeholder="Titel" id="title" class="title">
           </label>
           <label for="logo" class="btn">Logo wählen</label>
           <input type="file" accept="image/*" id="logo" class="disapear">
@@ -249,8 +249,6 @@
   <script>
     // ===== Oberklasse: BaseField =====
     class BaseField {
-      static instanceCounter = 0;  // Statische Variable für alle Instanzen
-
       constructor(options) {
           // Erhöhe Zähler bei jeder neuen Instanz
           this.instanceId = options.id || specs["vars"]["id-counter"]++;  // Speichere aktuelle Nummer in der Instanz
@@ -550,40 +548,10 @@
     class Textfield extends BaseField {
       constructor(options) {
         super({ ...options, type: "text" });
-        this.createTextInput();       //Initialisiert das eigentliche Eingabefeld im Body
         this.titleEl.textContent = "Textfeld"; //Header Anzeige wird gesetzt
         updateField(this);
       }
-
-      createTextInput() {
-        const wrapper = document.createElement("div");
-
-        // Label hinzufügen
-        const label = document.createElement("label");
-        label.textContent = "Text";
-        label.style.display = "block";
-        label.style.marginBottom = "4px";
-        label.style.fontSize = "12px";
-
-        // Input erstellen
-        const input = document.createElement("input");
-        input.type = "text";
-        input.style.width = "100%";
-        input.style.boxSizing = "border-box";
-
-        input.addEventListener("input", () => {
-            updateFieldProperties(this.instanceId, {
-                "value": input.value,
-            });
-        });
-
-        // Alles zusammenfügen
-        wrapper.appendChild(label);
-        wrapper.appendChild(input);
-        this.bodyEl.appendChild(wrapper);
-      }
     }
-
 
     class DropDownfield extends BaseField {
       constructor(options) {
@@ -749,6 +717,7 @@
         // Aktualisiert das Array mit allen Optionen
         this.options = Array.from(this.optionsContainer.querySelectorAll("span"))
             .map(span => span.textContent);
+        updateFieldProperties(this.instanceId, {options: this.options})
       }
 
       toConfigObject() {
@@ -766,37 +735,7 @@
         constructor(options){
             super({...options, type: "date"});
             this.titleEl.textContent = "Datum";
-            this.createDateInput();
             updateField(this);
-        }
-
-        createDateInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Datum Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("input");
-            input.type = "date";
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            //Änderungen werden bemerkt
-            input.addEventListener("input", () => {
-                updateFieldProperties(this.instanceId, {
-                    "value": input.value,
-                })
-            });
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
         }
     }
 
@@ -932,29 +871,6 @@
         constructor(options){
             super({...options, type: "file"});
             this.titleEl.textContent = "Datei";
-            this.createPictureInput();
-        }
-
-        createPictureInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Datei Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("input");
-            input.type = "file";
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
         }
     }
 
@@ -963,36 +879,7 @@
         constructor(options){
             super({...options, type: "number"});
             this.titleEl.textContent = "Zahlenfeld";
-            this.createNumberInput();
             updateField(this);
-        }
-
-        createNumberInput() {
-            const wrapper = document.createElement("div");
-
-            // Label
-            const label = document.createElement("label");
-            label.textContent = "Nummer Feld";
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontSize = "12px";
-
-            // Input
-            const input = document.createElement("input");
-            input.type = "number";
-            input.style.width = "100%";
-            input.style.boxSizing = "border-box";
-
-            input.addEventListener("input", () => {
-                updateFieldProperties(this.instanceId, {
-                    "value": input.value,
-                });
-            });
-
-            // Combine the ELEMENTS!!!!
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            this.bodyEl.appendChild(wrapper);
         }
     }
 
@@ -1030,6 +917,7 @@
         multipleChoice.addEventListener("change", () => {
             this.allowMultiple = multipleChoice.checked;
             this.updateOptionsPreview();
+            updateFieldProperties(this.instanceId, {allowMultiple: this.allowMultiple})
         });
 
         multipleChoiceContainer.appendChild(multipleChoice);
@@ -1212,6 +1100,7 @@
       updateOptions() {
         this.options = Array.from(this.optionsContainer.querySelectorAll("span"))
             .map(span => span.textContent);
+        updateFieldProperties(this.instanceId, {options: this.options})
       }
 
       toConfigObject() {
@@ -1365,16 +1254,20 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      let defaultSpecs = {
-          "form": {
-              "fields": [],
-              "scripts": []
-          },
-          "eval": {
-              "fields": [],
-              "scripts": []
-          }
+        document.getElementById("logo").onchange = function (event) {
+            let file = this.files[0];
+            let reader = new FileReader();
+
+            reader.onload = function (event) {
+                specs["vars"]["image"] = event.target.result;
+            };
+
+            reader.readAsDataURL(file);
       }
+        document.getElementById("title").onchange = function () {
+          specs["vars"]["title"] = document.getElementById("title").value;
+        }
+
 
       function render(givenSpecs = null, formType = "form") {
           let container = document.getElementById("form-builder");
@@ -1382,24 +1275,24 @@ formBuilder.addEventListener('drop', (e) => {
 
           //Wählt die Feldspezifikationen
           let formSpecs = givenSpecs[formType]["fields"]
-          if(givenSpecs === null) {
+          if (givenSpecs === null) {
               formSpecs = specs[formType]["fields"];
           }
 
           //Erstellt Felder gemäß Spezifikationen
-          for(let i = 0; i < formSpecs.length; i++){
-              console.log("started"+i+". time looping");
+          for (let i = 0; i < formSpecs.length; i++) {
+              console.log("started" + i + ". time looping");
               renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
-              console.log("created a "+formSpecs[i]["class"]);
-              console.log("finished "+i+". time looping");
+              console.log("created a " + formSpecs[i]["class"]);
+              console.log("finished " + i + ". time looping");
           }
 
-          if(givenSpecs !== null)
+          if (givenSpecs !== null)
               specs = givenSpecs;
       }
 
-      function renderField(type, args){
-          switch (type){
+      function renderField(type, args) {
+          switch (type) {
               //erstellt neues Feldobjekt je nach Typ mit den übergebenen Argumenten
               case "Textfield":
                   return new Textfield(args);
@@ -1422,19 +1315,17 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function insertField(field, formType = "form"){
+      function insertField(field, formType = "form") {
           let id = field.getID();
           let pos = getFieldPos(id);
           if(pos != null){
               //Existiert bereits: Feld updaten
               return updateField(field, formType);
-          }
-          else {
+          } else {
               //neu: an nächster freier Position einfügen
               let pos = specs[formType]["fields"].length;
               specs[formType]["fields"][pos] = {
-                  //
-                  "id" : id,
+                  "id": id,
                   "class": field.constructor.name,
                   "htmlType": "body",
                   "config": field.toConfigObject(),
@@ -1444,8 +1335,8 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function updateFieldProperties(fieldID, attributes, formType = "form"){
-          if(attributes == null)
+      function updateFieldProperties(fieldID, attributes, formType = "form") {
+          if (attributes == null)
               return;   //keine neuen Werte: Funktion abbrechen
           let pos = getFieldPos(fieldID);
           if (pos == null)
@@ -1453,25 +1344,25 @@ formBuilder.addEventListener('drop', (e) => {
           specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
       }
 
-      function moveField(fieldID, targetPos = null, formType = "form", pos = null){
-          console.log("field id: "+fieldID);
-          console.log("field at pos "+getFieldPos(fieldID)+" should be moved to "+targetPos);
-          if(pos == null)
+      function moveField(fieldID, targetPos = null, formType = "form", pos = null) {
+          console.log("field id: " + fieldID);
+          console.log("field at pos " + getFieldPos(fieldID) + " should be moved to " + targetPos);
+          if (pos == null)
               pos = getFieldPos(fieldID);
 
           //Zielfeld festlegen
-          if(targetPos == null)
-              targetPos = specs[formType]["fields"].length-1;
+          if (targetPos == null)
+              targetPos = specs[formType]["fields"].length - 1;
 
           //wenn Quelle und Ziel gleich = keine Änderung nötig
-          if(targetPos === pos)
+          if (targetPos === pos)
               return true;
 
           let fieldSpecs = specs[formType]["fields"][pos];
           //Verschieben nach oben, alle Felder dazwischen rücken eine Position weiter
-          if(targetPos < pos){
-              while(targetPos < pos){
-                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos-1];
+          if (targetPos < pos) {
+              while (targetPos < pos) {
+                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos - 1];
                   pos--;
               }
               specs[formType]["fields"][pos] = fieldSpecs;
@@ -1485,17 +1376,17 @@ formBuilder.addEventListener('drop', (e) => {
               specs[formType]["fields"][pos] = fieldSpecs;
           }
 
-          console.log("Element moved to position "+targetPos);
+          console.log("Element moved to position " + targetPos);
 
           return true;  //erfolgreich verschoben
       }
 
-      function updateField(field, formType = "form", pos = null){
+      function updateField(field, formType = "form", pos = null) {
           //überprüft ob Feld gültig ist
-          if(field == null || !(field instanceof BaseField))
+          if (field == null || !(field instanceof BaseField))
               return false;
 
-          if(pos == null)
+          if (pos == null)
               pos = getFieldPos(field.getID());
 
           let fieldSpecs = specs[formType]["fields"][pos];
@@ -1506,53 +1397,53 @@ formBuilder.addEventListener('drop', (e) => {
           return true;  //erfolgreich aktualisiert
       }
 
-      function getFieldPos(fieldID, formType = "form"){
+      function getFieldPos(fieldID, formType = "form") {
           let fields = specs[formType]["fields"];
           console.log(fields);
-          if(fields != null){
+          if (fields != null) {
               let i = 0;
               //sucht nach Feld mit der passenden ID
-              while(i < fields.length){
-                  if(fields[i] != null && fields[i]["id"] == fieldID)
+              while (i < fields.length) {
+                  if (fields[i] != null && fields[i]["id"] == fieldID)
                       return i; //Rückgabe der Position
                   i++;
               }
-          }
-          else {
+          } else {
               return null;  //Kein Feldarray vorhanden
           }
       }
 
-      function removeField(field, formType = "form"){
+      function removeField(field, formType = "form") {
           //prüft Feld auf Gültigkeit
-          if(field == null || !(field instanceof BaseField))
+          if (field == null || !(field instanceof BaseField))
               return false;
 
           let fields = specs[formType]["fields"];
-          moveField(field.getID(), fields.length-1);
+          moveField(field.getID(), fields.length - 1);
           fields.pop();
       }
 
   </script>
-  <script>
-      // script for updating and saving
-      function downloadBuilder(){
-          let jsonLink = document.createElement('a');
-          console.log(specs);
-          jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
+    <script>
+        // script for updating and saving
+        function downloadBuilder() {
+            let jsonLink = document.createElement('a');
+            console.log(specs);
+            jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
           jsonLink.download = 'specs.json';
           jsonLink.click();
       }
 
       function exportBuilder(){
+        let title = document.getElementById("title").value
         let formLink = document.createElement('a');
-        formLink.href = URL.createObjectURL(new File([getFormBlob()], "form.html"));
-        formLink.download = 'form.html';
+        formLink.href = URL.createObjectURL(new File([getFormBlob()], `${title}-Formular.html`));
+        formLink.download = `${title}-Formular.html`;
         formLink.click();
 
         let auswertungLink = document.createElement('a');
         auswertungLink.href = URL.createObjectURL(new File([getAuswertungBlob()], "auswertung.html"));
-        auswertungLink.download = 'auswertung.html';
+        auswertungLink.download = `${title}-Auswertung.html`;
         auswertungLink.click();
 }
 
@@ -1568,28 +1459,6 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function createFormFromJson(){
-          return createHTMLFromJson("form");
-      }
-
-      function createEvalFromJson(){
-          return createHTMLFromJson("eval");
-      }
-
-      function createHTMLFromJson(type){
-          let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
-          let html = new HtmlObj();
-          if (fields != null && fields instanceof Array && fields.length > 0){
-              fields.forEach(field => html.append(field));
-          }
-
-          let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
-          if (scripts != null && scripts instanceof Array && scripts.length > 0){
-              scripts.forEach(script => html.append(script));
-          }
-
-          return html.finish();
-      }
 
       function getSpecsBlob(){
           let jsonSpecs = new JsonObj(specs);
@@ -1597,17 +1466,10 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function getFormBlob(){
-          let htmlForm = createFormFromJson();
+          let htmlForm = new HtmlObj()
+          htmlForm.appendBody(createFormHtml(specs));
+          htmlForm.finish();
           return htmlForm.getDownloadFile();
-      }
-
-      function getEvalBlob(){
-          let htmlEval = createEvalFromJson();
-          return htmlEval.getDownloadFile();
-      }
-
-      function createZip(json, files){
-
       }
 
       class Obj{
@@ -1665,6 +1527,10 @@ formBuilder.addEventListener('drop', (e) => {
           getContent() {
               return this.fullHtml;
           }
+
+          appendBody(html){
+              this.htmlBody += html;
+          }
       }
 
       class JsonObj extends Obj{
@@ -1694,11 +1560,13 @@ formBuilder.addEventListener('drop', (e) => {
   </script>
   <script>
 function createAuswertungHTML() {
+    let title = document.getElementById("title").value
+    let logo = document.getElementById("logo")
     return `<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Auswertung</title>
+    <title>${title}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1861,7 +1729,8 @@ function createAuswertungHTML() {
 <body>
 <div class="container">
     <div class="title-box">
-        <h1>Auswertung</h1>
+        <h1>${title}</h1>
+        <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
     </div>
 
     <div class="upload-box">
@@ -1883,6 +1752,8 @@ function createAuswertungHTML() {
             </div>
         </div>
 
+        <button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
+
         <div class="file-info" id="fileInfo"></div>
         <div class="error-message" id="errorMessage"></div>
         <div class="success-message" id="successMessage"></div>
@@ -1898,6 +1769,17 @@ function createAuswertungHTML() {
 <script>
     let allData = [];
     let fieldTitles = [];
+
+    const specs = ${JSON.stringify(specs)};
+
+
+    function exportSpecs() {
+        let jsonLink = document.createElement('a');
+        console.log(specs);
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
+        jsonLink.download = 'specs.json';
+        jsonLink.click();
+    }
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const files = e.target.files;
@@ -2175,7 +2057,7 @@ function createAuswertungHTML() {
             printWindow.document.open();
             const htmlContent = '<html lang="De">\\n' +
                 '<head>\\n' +
-                '<title>Auswertung</title>\\n' +
+                '<title>${title}</title>\\n' +
                 '<style>\\n' +
                 'body { font-family: Arial, sans-serif; }\\n' +
                 'h1 { color: #333; }\\n' +
@@ -2187,7 +2069,7 @@ function createAuswertungHTML() {
                 '</style>\\n' +
                 '</head>\\n' +
                 '<body>\\n' +
-                '<h1>Auswertung</h1>\\n' +
+                '<h1>${title}</h1>\\n' +
                 table +
                 '</body>\\n' +
                 '</html>';
@@ -2222,7 +2104,7 @@ function createAuswertungHTML() {
 
             let temp_link = document.createElement('a');
 
-            temp_link.download = \`Auswertung.csv\`;
+            temp_link.download = \`${title}.csv\`;
         let url = window.URL.createObjectURL(CSVFile);
         temp_link.href = url;
 
@@ -2243,10 +2125,403 @@ function getAuswertungBlob() {
     return new Blob([htmlAuswertung], {type: 'text/html'});
 }
   </script>
+<script>
+    function createFormHtml(specs){ // TODO fix image height
+        return `<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>${specs["vars"]["title"]}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+         .title-box {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+         .title-box h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .field {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+        .field-header {
+            background: #007bff;
+            color: #fff;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 6px 6px 0 0;
+            margin: -15px -15px 10px -15px;
+        }
+        .field-title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .field-required {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+        }
+        .field-required-indicator {
+            color: #ffeb3b;
+            font-size: 14px;
+        }
+        .field-body {
+            padding: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-box">
+        <h1>${specs["vars"]["title"]}</h1>
+        <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
+        </div>
+    <div class="upload-box">
+        <button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
+
+    </div>
+    <div id="form-builder"></div>
     <script>
+        const specs = ${JSON.stringify(specs)};
 
+    function exportSpecs() {
+        let jsonLink = document.createElement('a');
+        console.log(specs);
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
+        jsonLink.download = 'specs.json';
+        jsonLink.click();
+    }
 
+        function renderForm(givenSpecs, formType = "form") {
+            const container = document.getElementById("form-builder");
+            if (!container) {
+                console.error('Container #form-builder nicht gefunden');
+                return;
+            }
+            container.innerHTML = "";
 
-    </script>
+            const formSpecs = givenSpecs[formType]["fields"];
+
+            for(let i = 0; i < formSpecs.length; i++){
+                renderFormField(formSpecs[i]["class"], formSpecs[i]["config"]);
+            }
+        }
+
+        function renderFormField(type, config){
+            switch (type){
+                case "Textfield":
+                    return new TextFormField(config);
+                case "DropDownfield":
+                    return new DropdownFormField(config);
+                case "DateField":
+                    return new DateFormField(config);
+                case "InfoField":
+                    return new InfoFormField(config);
+                case "PictureField":
+                    return new PictureFormField(config);
+                case "FileField":
+                    return new FileFormField(config);
+                case "NumberField":
+                    return new NumberFormField(config);
+                case "Radio_MultipleChoicefield":
+                    return new RadioMultipleChoiceFormField(config);
+                default:
+                    return null;
+            }
+        }
+
+        class BaseFormField{
+            constructor(config) {
+                this.instanceId = config.id;
+                this.type = config.type || "base";
+                this.title = config.title || "";
+                this.infoText = config.infoText || "";
+                this.required = config.required || false;
+                this.x = config.x || 0;
+                this.y = config.y || 0;
+
+                this.createFormField();
+            }
+
+            createFormField() {
+                const container = document.getElementById("form-builder");
+
+                this.el = document.createElement("div");
+                this.el.className = "field";
+                this.el.id = String(this.instanceId);
+
+                const header = document.createElement("div");
+                header.className = "field-header";
+
+                const titleSpan = document.createElement("span");
+                titleSpan.className = "field-title";
+                titleSpan.textContent = this.title || "Feld";
+                if (this.infoText) {
+                    titleSpan.setAttribute("title", this.infoText);
+                }
+
+                const rightHeader = document.createElement("div");
+                rightHeader.className = "field-required";
+
+                if(this.required) {
+                    const cbLabel = document.createElement("span");
+                    cbLabel.textContent = "Pflicht";
+
+                    const reqIndicator = document.createElement("span");
+                    reqIndicator.className = "field-required-indicator";
+                    reqIndicator.textContent = "*";
+
+                    rightHeader.appendChild(cbLabel);
+                    rightHeader.appendChild(reqIndicator);
+                }
+
+                header.appendChild(titleSpan);
+                header.appendChild(rightHeader);
+
+                const body = document.createElement("div");
+                body.className = "field-body";
+                this.bodyEl = body;
+
+                this.el.appendChild(header);
+                this.el.appendChild(body);
+                container.appendChild(this.el);
+            }
+        }
+
+        class TextFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createTextInput();
+            }
+
+            createTextInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "text";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class DropdownFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.options = config.options || [];
+                this.createDropdownInput();
+            }
+
+            createDropdownInput(){
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const select = document.createElement("select");
+                select.id = "field_" + this.instanceId;
+
+                this.options.forEach(optionText => {
+                    const option = document.createElement("option");
+                    option.value = optionText;
+                    option.textContent = optionText;
+                    select.appendChild(option);
+                });
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(select);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class DateFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createDateInput();
+            }
+
+            createDateInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "date";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class InfoFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.value = config.value || "";
+                this.createInfoText();
+            }
+
+            createInfoText(){
+                const wrapper = document.createElement("div");
+                const text = document.createElement("p");
+                text.textContent = this.value;
+                text.style.margin = "0";
+                text.style.fontSize = "14px";
+
+                wrapper.appendChild(text);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class PictureFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.value = config.value || "";
+                this.createPicture();
+            }
+
+            createPicture(){
+                const wrapper = document.createElement("div");
+                if (this.value) {
+                    const img = document.createElement("img");
+                    img.src = this.value;
+                    img.alt = this.title;
+                    wrapper.appendChild(img);
+                }
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class FileFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createFileInput();
+            }
+
+            createFileInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "file";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class NumberFormField extends BaseFormField{
+            constructor(config) {
+                super(config);
+                this.createNumberInput();
+            }
+
+            createNumberInput() {
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.id = "field_" + this.instanceId;
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        class RadioMultipleChoiceFormField extends BaseFormField{
+            constructor(config){
+                super(config);
+                this.options = config.options || [];
+                this.allowMultiple = config.allowMultiple || false;
+                this.createOptions();
+            }
+
+            createOptions(){
+                const wrapper = document.createElement("div");
+                const label = document.createElement("label");
+                label.textContent = this.title;
+                wrapper.appendChild(label);
+
+                this.options.forEach((optionText, index) => {
+                    const optionWrapper = document.createElement("div");
+                    optionWrapper.style.marginTop = "8px";
+
+                    const input = document.createElement("input");
+                    input.type = this.allowMultiple ? "checkbox" : "radio";
+                    input.id = "field_" + this.instanceId + "_" + index;
+                    input.name = "field_" + this.instanceId;
+                    input.value = optionText;
+
+                    const optionLabel = document.createElement("label");
+                    optionLabel.htmlFor = input.id;
+                    optionLabel.textContent = optionText;
+                    optionLabel.style.marginLeft = "8px";
+                    optionLabel.style.fontWeight = "normal";
+
+                    optionWrapper.appendChild(input);
+                    optionWrapper.appendChild(optionLabel);
+                    wrapper.appendChild(optionWrapper);
+                });
+
+                this.bodyEl.appendChild(wrapper);
+            }
+        }
+
+        // Render nach DOM-Load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => renderForm(specs));
+        } else {
+            renderForm(specs);
+        }
+    <`+`/script>
+</body>
+</html>`;
+    }
+</script>
 </body>
 </html>
