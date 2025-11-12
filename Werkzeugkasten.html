@@ -756,6 +756,9 @@
             super({...options, type: "info", required: false});
             this.titleEl.textContent = "Infofeld";
             this.createInfoInput();
+            if (options.value != null) {
+                this.el.children[1].children[1].children[1].value = options.value
+            }
             updateField(this);
         }
 
