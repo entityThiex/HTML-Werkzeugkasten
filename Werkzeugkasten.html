@@ -1239,16 +1239,12 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      let defaultSpecs = {
-          "form": {
-              "fields": [],
-              "scripts": []
-          },
-          "eval": {
-              "fields": [],
-              "scripts": []
-          }
+        document.getElementById("logo").onchange = function (event) {
+          specs["vars"]["image"] = event.target.result;
       }
+        document.getElementById("titel").onchange = function () {
+          specs["vars"]["title"] = document.getElementById("titel").value;
+        }
 
 
       function render(givenSpecs = null, formType = "form") {
@@ -1256,23 +1252,23 @@ formBuilder.addEventListener('drop', (e) => {
           container.innerHTML = "";
 
           let formSpecs = givenSpecs[formType]["fields"]
-          if(givenSpecs === null) {
+          if (givenSpecs === null) {
               formSpecs = specs[formType]["fields"];
           }
 
-          for(let i = 0; i < formSpecs.length; i++){
-              console.log("started"+i+". time looping");
+          for (let i = 0; i < formSpecs.length; i++) {
+              console.log("started" + i + ". time looping");
               renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
-              console.log("created a "+formSpecs[i]["class"]);
-              console.log("finished "+i+". time looping");
+              console.log("created a " + formSpecs[i]["class"]);
+              console.log("finished " + i + ". time looping");
           }
 
-          if(givenSpecs !== null)
+          if (givenSpecs !== null)
               specs = givenSpecs;
       }
 
-      function renderField(type, args){
-          switch (type){
+      function renderField(type, args) {
+          switch (type) {
               case "Textfield":
                   return new Textfield(args);
               case "DropDownfield":
@@ -1294,16 +1290,15 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function insertField(field, formType = "form"){
+      function insertField(field, formType = "form") {
           let id = field.getID();
           let pos = getFieldPos(id);
-          if(pos != null){
+          if (pos != null) {
               return updateField(field, formType);
-          }
-          else {
+          } else {
               let pos = specs[formType]["fields"].length;
               specs[formType]["fields"][pos] = {
-                  "id" : id,
+                  "id": id,
                   "class": field.constructor.name,
                   "htmlType": "body",
                   "config": field.toConfigObject(),
@@ -1313,8 +1308,8 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function updateFieldProperties(fieldID, attributes, formType = "form"){
-          if(attributes == null)
+      function updateFieldProperties(fieldID, attributes, formType = "form") {
+          if (attributes == null)
               return;
           let pos = getFieldPos(fieldID);
           if (pos == null)
@@ -1322,44 +1317,43 @@ formBuilder.addEventListener('drop', (e) => {
           specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
       }
 
-      function moveField(fieldID, targetPos = null, formType = "form", pos = null){
-          console.log("field id: "+fieldID);
-          console.log("field at pos "+getFieldPos(fieldID)+" should be moved to "+targetPos);
-          if(pos == null)
+      function moveField(fieldID, targetPos = null, formType = "form", pos = null) {
+          console.log("field id: " + fieldID);
+          console.log("field at pos " + getFieldPos(fieldID) + " should be moved to " + targetPos);
+          if (pos == null)
               pos = getFieldPos(fieldID);
 
-          if(targetPos == null)
-              targetPos = specs[formType]["fields"].length-1;
+          if (targetPos == null)
+              targetPos = specs[formType]["fields"].length - 1;
 
-          if(targetPos === pos)
+          if (targetPos === pos)
               return true;
 
           let fieldSpecs = specs[formType]["fields"][pos];
-          if(targetPos < pos){
-              while(targetPos < pos){
-                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos-1];
+          if (targetPos < pos) {
+              while (targetPos < pos) {
+                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos - 1];
                   pos--;
               }
               specs[formType]["fields"][pos] = fieldSpecs;
-          }
-          else{
-              while(targetPos > pos){
-                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos+1];
+          } else {
+              while (targetPos > pos) {
+                  specs[formType]["fields"][pos] = specs[formType]["fields"][pos + 1];
                   pos++;
               }
               specs[formType]["fields"][pos] = fieldSpecs;
           }
 
-          console.log("Element moved to position "+targetPos);
+          console.log("Element moved to position " + targetPos);
 
           return true;
       }
 
-      function updateField(field, formType = "form", pos = null){
-          if(field == null || !(field instanceof BaseField))
+      function updateField(field, formType = "form", pos = null) {
+          if (field == null || !(field instanceof BaseField))
               return false;
 
-          if(pos == null)
+          if (pos == null)
               pos = getFieldPos(field.getID());
 
           let fieldSpecs = specs[formType]["fields"][pos];
@@ -1370,38 +1364,37 @@ formBuilder.addEventListener('drop', (e) => {
           return true;
       }
 
-      function getFieldPos(fieldID, formType = "form"){
+      function getFieldPos(fieldID, formType = "form") {
           let fields = specs[formType]["fields"];
           console.log(fields);
-          if(fields != null){
+          if (fields != null) {
               let i = 0;
-              while(i < fields.length){
-                  if(fields[i] != null && fields[i]["id"] == fieldID)
+              while (i < fields.length) {
+                  if (fields[i] != null && fields[i]["id"] == fieldID)
                       return i;
                   i++;
               }
-          }
-          else {
+          } else {
               return null;
           }
       }
 
-      function removeField(field, formType = "form"){
-          if(field == null || !(field instanceof BaseField))
+      function removeField(field, formType = "form") {
+          if (field == null || !(field instanceof BaseField))
               return false;
 
           let fields = specs[formType]["fields"];
-          moveField(field.getID(), fields.length-1);
+          moveField(field.getID(), fields.length - 1);
           fields.pop();
       }
 
   </script>
-  <script>
-      // script for updating and saving
-      function downloadBuilder(){
-          let jsonLink = document.createElement('a');
-          console.log(specs);
-          jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
+    <script>
+        // script for updating and saving
+        function downloadBuilder() {
+            let jsonLink = document.createElement('a');
+            console.log(specs);
+            jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
           jsonLink.download = 'specs.json';
           jsonLink.click();
       }
