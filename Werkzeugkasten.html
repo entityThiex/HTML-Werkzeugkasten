@@ -187,6 +187,7 @@
     }
 
     .rightMenu {
+        width: 25%;
         top: 0;
         right: 0;
         position: absolute;
@@ -196,13 +197,6 @@
 
     .disapear {
         display: none;
-    }
-
-    .preview {
-        max-width: 50px;
-        max-height: 50px;
-        position: relative;
-        display: inline-block;
     }
   </style>
 </head>
@@ -235,17 +229,12 @@
       <label for="importFile" class="btn">Import</label>
       <input id="importFile" type="file" accept="*/*" class="disapear">
 
-      <div class="rightMenu" id="rightMenu">
+      <div class="rightMenu">
           <label>
               <input type="text" placeholder="Titel" id="title" class="title">
           </label>
-
-
           <label for="logo" class="btn">Logo wählen</label>
           <input type="file" accept="image/*" id="logo" class="disapear">
-
-          <img src="#" class="preview" id="preview">
-
 
       </div>
     </div>
@@ -1259,9 +1248,6 @@ formBuilder.addEventListener('drop', (e) => {
 
             reader.onload = function (event) {
                 specs["vars"]["image"] = event.target.result;
-                let preview = document.getElementById("preview");
-                preview.src = event.target.result
-
             };
 
             reader.readAsDataURL(file);
@@ -1734,7 +1720,7 @@ function createAuswertungHTML() {
             </div>
         </div>
 
-        <button class="upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
+        <button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
 
         <div class="file-info" id="fileInfo"></div>
         <div class="error-message" id="errorMessage"></div>
@@ -2194,7 +2180,8 @@ function getAuswertungBlob() {
         <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
         </div>
     <div class="upload-box">
-        <!--button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button-->
+        <!--button class="upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button-->
+        <button class="upload-btn submit-btn" onclick="exportFormAsZip()">Formular als ZIP exportieren</button>
 
     </div>
     <div id="form-builder"></div>
