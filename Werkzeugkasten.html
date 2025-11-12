@@ -1737,13 +1737,13 @@ function createAuswertungHTML() {
     let allData = [];
     let fieldTitles = [];
 
-    let specs = ${JSON.stringify(specs)};
+    const specs = ${JSON.stringify(specs)};
 
 
     function exportSpecs() {
         let jsonLink = document.createElement('a');
         console.log(specs);
-        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], 'application/json')], "specs.json"));
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
         jsonLink.download = 'specs.json';
         jsonLink.click();
     }
@@ -2178,9 +2178,21 @@ function getAuswertungBlob() {
         <h1>${specs["vars"]["title"]}</h1>
         <img src="${specs["vars"]["image"]}" alt="" height="100" width=auto></img>
         </div>
+    <div class="upload-box">
+        <button class"upload-btn" onclick="exportSpecs()">Fragebogen wiederherstellen</button>
+
+    </div>
     <div id="form-builder"></div>
     <script>
         const specs = ${JSON.stringify(specs)};
+
+    function exportSpecs() {
+        let jsonLink = document.createElement('a');
+        console.log(specs);
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
+        jsonLink.download = 'specs.json';
+        jsonLink.click();
+    }
 
         function renderForm(givenSpecs, formType = "form") {
             const container = document.getElementById("form-builder");
