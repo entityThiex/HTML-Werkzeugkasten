@@ -294,12 +294,6 @@
         cb.checked = this.required;
         this.requiredCheckbox = cb;
 
-        cb.addEventListener("change", () => {
-            updateFieldProperties(this.instanceId, {
-                "required": this.requiredCheckbox.checked,
-            });
-        });
-
         const cbLabel = document.createElement("span");
         cbLabel.textContent = "Pflicht"; //Text für Label
 
@@ -363,6 +357,9 @@
         this.requiredCheckbox.addEventListener("change", () => {
           this.required = this.requiredCheckbox.checked;
           this.requiredIndicator.textContent = this.required ? "*" : "";
+            updateFieldProperties(this.instanceId, {
+                "required": this.requiredCheckbox.checked,
+            });
         });
       }
 
