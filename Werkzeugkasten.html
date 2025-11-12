@@ -233,7 +233,7 @@
           insertField(this);
       }
 
-      createDOM(additionalProperties) {
+      createDOM() {
         const container = document.getElementById("form-builder");
 
         this.el = document.createElement("div");
@@ -293,6 +293,12 @@
         cb.type = "checkbox";
         cb.checked = this.required;
         this.requiredCheckbox = cb;
+
+        cb.addEventListener("change", () => {
+            updateFieldProperties(this.instanceId, {
+                "required": this.requiredCheckbox.checked,
+            });
+        });
 
         const cbLabel = document.createElement("span");
         cbLabel.textContent = "Pflicht"; //Text für Label
@@ -1271,7 +1277,9 @@ formBuilder.addEventListener('drop', (e) => {
   <script>
       let specs = {
           "vars": {
-              "id-counter": 0
+              "id-counter": 0,
+              "title": "",
+              "image": null
           },
           "form": {
               "fields": [],
@@ -1357,15 +1365,12 @@ formBuilder.addEventListener('drop', (e) => {
       }
 
       function updateFieldProperties(fieldID, attributes, formType = "form"){
-          console.log("attr: "+JSON.stringify(attributes))
           if(attributes == null)
               return;
           let pos = getFieldPos(fieldID);
           if (pos == null)
               return;
-          console.log("conf: "+JSON.stringify(specs[formType]["fields"][pos]["config"]))
           specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
-          console.log("new conf: "+JSON.stringify(specs[formType]["fields"][pos]["config"]));
       }
 
       function moveField(fieldID, targetPos = null, formType = "form", pos = null){
