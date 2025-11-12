@@ -1,174 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Auswertung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .title-box {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .upload-box {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .upload-btn {
+            background-color: #04AA6D;
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .matrix-container {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .error-message {
+            background: #ff4444;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-<button id="saveBtn">Aktuellen Stand Speichern</button>
-<button id="exportBtn">Aktuellen Stand Exportieren</button>
+<div class="container">
+    <div class="title-box">
+        <h1>Auswertung</h1>
+    </div>
+
+    <div class="upload-box">
+        <input type="file" id="fileInput" accept=".json" multiple>
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            JSON Dateien hochladen
+        </button>
+        <div class="file-info" id="fileInfo"></div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="matrix-container">
+        <div id="tableContainer">
+            <div class="no-data">Bitte laden Sie JSON-Dateien, um die Auswertung anzuzeigen.</div>
+        </div>
+    </div>
+</div>
 
 <script>
-    function downloadBuilder(){
-        let jsonLink = document.createElement('a');
-        jsonLink.href = URL.createObjectURL(new File([getSpecsBlob()], "specs.json"));
-        jsonLink.download = 'specs.json';
-        jsonLink.click();
-    }
+    let allData = [];
+    let fieldTitles = [];
 
-    function exportBuilder(){
-        let formLink = document.createElement('a');
-        formLink.href = URL.createObjectURL(new File([getFormBlob()], "form.html"));
-        formLink.download = 'form.html';
-        formLink.click();
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files.length === 0) return;
 
-        let evalLink = document.createElement('a');
-        evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
-        evalLink.download = 'eval.html';
-        evalLink.click();
-    }
+        allData = [];
+        fieldTitles = [];
 
-    let specs = {
-        "vars": {
-            "id-counter": 0
-        },
-        "form": {
-            "fields": [],
-            "scripts": []
-        },
-        "eval": {
-            "fields": [],
-            "scripts": []
-        }
-    }
+        const fileInfo = document.getElementById('fileInfo');
+        fileInfo.textContent = `${files.length} Datei(en) ausgewählt`;
 
-    let defaultSpecs = {
-        "form": {
-            "fields": [],
-            "scripts": []
-        },
-        "eval": {
-            "fields": [],
-            "scripts": []
-        }
-    }
+        let filesProcessed = 0;
 
-    function createFormFromJson(){
-        return createHTMLFromJson("form");
-    }
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
 
-    function createEvalFromJson(){
-        return createHTMLFromJson("eval");
-    }
+            reader.onload = function(event) {
+                try {
+                    const jsonData = JSON.parse(event.target.result);
+                    processJsonData(jsonData, file.name);
+                    filesProcessed++;
 
-    function createHTMLFromJson(type){
-        let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
-        let html = new HtmlObj();
-        if (fields != null && fields instanceof Array && fields.length > 0){
-            fields.forEach(html.append());
-        }
-
-        let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
-        if (scripts != null && scripts instanceof Array && scripts.length > 0){
-            scripts.forEach(html.append());
-        }
-
-        return html.finish();
-    }
-
-    function getSpecsBlob(){
-        let jsonSpecs = new JsonObj(specs);
-        return jsonSpecs.getDownloadFile();
-    }
-
-    function getFormBlob(){
-        let htmlForm = createFormFromJson();
-        return htmlForm.getDownloadFile();
-    }
-
-    function getEvalBlob(){
-        let htmlEval = createEvalFromJson();
-        return htmlEval.getDownloadFile();
-    }
-
-    function createZip(json, files){
-
-    }
-
-    function loadFile(){
-
-    }
-
-    class Obj{
-        constructor() {
-
-        }
-
-        getDownloadFile(data, type){ // TODO if there is a better option
-            return new Blob([data], {type: type});
-        }
-    }
-
-    class HtmlObj extends Obj{
-        fullHtml = "";
-        htmlHeader = "<header>";
-        htmlBody = "<body>";
-        htmlFooter = "<footer>";
-
-        constructor(html = "<!DOCTYPE html><html lang=\"de\">"){
-            super();
-            this.fullHtml = html;
-        }
-
-        append(jsonHtml){
-            if(jsonHtml != null && jsonHtml instanceof JSON && jsonHtml.has("html")){
-                if (jsonHtml.has("type") && jsonHtml["type"] === "header"){
-                    this.htmlHeader += jsonHtml["html"];
+                    if (filesProcessed === files.length) {
+                        generateTable();
+                    }
+                } catch (error) {
+                    showError(`Fehler beim Laden von ${file.name}: ${error.message}`);
                 }
-                else if (jsonHtml.has("type") && jsonHtml["type"] === "body") {
-                    this.htmlBody += jsonHtml["html"];
+            };
+
+            reader.onerror = function() {
+                showError(`Fehler beim Lesen von ${file.name}`);
+            };
+
+            reader.readAsText(file);
+        });
+    });
+
+    function processJsonData(data, fileName) {
+        const rowData = {
+            fileName: fileName,
+            values: {}
+        };
+
+        if (data.form && data.form.fields && Array.isArray(data.form.fields)) {
+            data.form.fields.forEach(field => {
+                const title = field.config.title || field.class || 'Unbekannt';
+
+                if (!fieldTitles.includes(title)) {
+                    fieldTitles.push(title);
                 }
-                else if (jsonHtml.has("type") && jsonHtml["type"] === "footer") {
-                    this.htmlFooter += jsonHtml["html"];
-                }
-            }
-            return this;
+
+                rowData.values[title] = getFieldValue(field.config);
+            });
         }
 
-        finish(){
-            this.htmlHeader += "</header>";
-            this.htmlBody += "</body>";
-            this.htmlFooter += "</footer>";
-            this.fullHtml += this.htmlHeader+this.htmlBody+this.htmlFooter+"</html>";
-            return this;
-        }
-
-        getDownloadFile() {
-            return super.getDownloadFile(this.fullHtml, 'text/html');
-        }
-
-        getContent() {
-            return this.fullHtml;
-        }
+        allData.push(rowData);
     }
 
-    class JsonObj extends Obj{
-        json = {}
-        constructor(json) {
-            super();
-            this.json = json;
-        }
+    function getFieldValue(field) {
 
-        getDownloadFile() {
-            return super.getDownloadFile(JSON.stringify(this.json), 'application/json');
-        }
-
-        getContent() {
-            return this.json;
-        }
     }
-    document.getElementById("saveBtn").onclick = function() {downloadBuilder()};
-    document.getElementById("exportBtn").onclick = function() {exportBuilder()};
+
+    function generateTable() {
+        const tableContainer = document.getElementById('tableContainer');
+
+        if (allData.length === 0 || fieldTitles.length === 0) {
+            tableContainer.innerHTML = '<div class="no-data">Keine Daten gefunden.</div>';
+            return;
+        }
+
+        let tableHTML = '<table><thead><tr>';
+        tableHTML += '<th>Dateiname</th>';
+
+        fieldTitles.forEach(title => {
+            tableHTML += `<th>${escapeHtml(title)}</th>`;
+        });
+
+        tableHTML += '</tr></thead><tbody>';
+
+        allData.forEach(row => {
+            tableHTML += '<tr>';
+            tableHTML += `<td>${escapeHtml(row.fileName)}</td>`;
+
+            fieldTitles.forEach(title => {
+                const value = row.values[title] || '-';
+                tableHTML += `<td>${escapeHtml(String(value))}</td>`;
+            });
+
+            tableHTML += '</tr>';
+        });
+
+        tableHTML += '</tbody></table>';
+        tableContainer.innerHTML = tableHTML;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
 </script>
 </body>
 </html>
