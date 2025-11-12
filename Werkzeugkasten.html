@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Oberklasse-Feld (Basisversion)</title>
+  <title>VelociDACSor</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -2408,7 +2408,8 @@ function getAuswertungBlob() {
             } else if (fieldSpec.class === 'Radio_MultipleChoicefield') {
                 if (fieldSpec.config.allowMultiple) {
                     const checkboxes = document.querySelectorAll('input[name="field_' + fieldId + '"]:checked');
-                    value = Array.from(checkboxes).map(cb => cb.value);
+                    console.log(checkboxes[0].labels[0].innerHTML)
+                    value = Array.from(checkboxes).map(cb => cb.labels[0].innerHTML);
                 } else {
                     const radio = document.querySelector('input[name="field_' + fieldId + '"]:checked');
                     value = radio ? radio.value : '';
@@ -2721,6 +2722,7 @@ function getAuswertungBlob() {
                         });
                     }
                     input.id = "field_" + this.instanceId + "_" + index;
+                    input.name = "field_" + this.instanceId
 
 
                     optionWrapper.appendChild(input);
