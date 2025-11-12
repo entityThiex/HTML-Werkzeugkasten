@@ -222,7 +222,7 @@
           insertField(this);
       }
 
-      createDOM() {
+      createDOM(additionalProperties) {
         const container = document.getElementById("form-builder");
 
         this.el = document.createElement("div");
@@ -249,7 +249,14 @@
       const field = this.el;
       const parent = this
       btnUp.onclick = function () {
+          console.log(field);
           container.insertBefore(field, field.previousElementSibling);
+          if(field.previousElementSibling === null){
+              moveField(field.id, 0);
+          }
+          else {
+              moveField(field.id, getFieldPos(field.previousElementSibling.id));
+          }
           parent.repositionAllFields();
       };
 
@@ -259,7 +266,13 @@
       btnDown.onclick = function () {
           console.log(field);
           container.insertBefore(field.nextElementSibling, field);
-          parent.repositionAllFields()
+          if(field.nextElementSibling === null){
+              moveField(field.id);
+          }
+          else{
+              moveField(field.nextElementSibling.id, getFieldPos(field.id));
+          }
+          parent.repositionAllFields();
       }
 
         const rightHeader = document.createElement("div");
@@ -410,8 +423,10 @@
 
           if (nextSibling) {
             container.insertBefore(draggingItem, nextSibling);
+            moveField(draggingItem.id, getFieldPos(nextSibling.id));
           } else {
             container.appendChild(draggingItem);
+              moveField(draggingItem.id);
           }
         });
 
@@ -441,6 +456,7 @@
           field.style.left = "0px";
           field.style.top = currentY + "px";
           currentY += field.offsetHeight + 10;
+            updateFieldProperties(field.id, {"x": field.offsetLeft, "y": field.offsetTop});
         });
       }
 
@@ -1267,7 +1283,7 @@ formBuilder.addEventListener('drop', (e) => {
 
       function insertField(field, formType = "form"){
           let id = field.getID();
-          let pos = getFieldPos(field);
+          let pos = getFieldPos(id);
           if(pos != null){
               return updateField(field, formType);
           }
@@ -1284,12 +1300,26 @@ formBuilder.addEventListener('drop', (e) => {
           }
       }
 
-      function moveField(field, targetPos, formType = "form", pos = null){
-          if(field == null || !(field instanceof BaseField))
-              return false;
+      function updateFieldProperties(fieldID, attributes, formType = "form"){
+          console.log("attr: "+JSON.stringify(attributes))
+          if(attributes == null)
+              return;
+          let pos = getFieldPos(fieldID);
+          if (pos == null)
+              return;
+          console.log("conf: "+JSON.stringify(specs[formType]["fields"][pos]["config"]))
+          specs[formType]["fields"][pos]["config"] = {...specs[formType]["fields"][pos]["config"], ...attributes};
+          console.log("new conf: "+JSON.stringify(specs[formType]["fields"][pos]["config"]));
+      }
 
+      function moveField(fieldID, targetPos = null, formType = "form", pos = null){
+          console.log("field id: "+fieldID);
+          console.log("field at pos "+getFieldPos(fieldID)+" should be moved to "+targetPos);
           if(pos == null)
-              pos = getFieldPos(field);
+              pos = getFieldPos(fieldID);
+
+          if(targetPos == null)
+              targetPos = specs[formType]["fields"].length-1;
 
           if(targetPos === pos)
               return true;
@@ -1309,6 +1339,10 @@ formBuilder.addEventListener('drop', (e) => {
               }
               specs[formType]["fields"][pos] = fieldSpecs;
           }
+
+          console.log("Element moved to position "+targetPos);
+
+          return true;
       }
 
       function updateField(field, formType = "form", pos = null){
@@ -1316,7 +1350,7 @@ formBuilder.addEventListener('drop', (e) => {
               return false;
 
           if(pos == null)
-              pos = getFieldPos(field);
+              pos = getFieldPos(field.getID());
 
           let fieldSpecs = specs[formType]["fields"][pos];
           fieldSpecs["htmlType"] = "body";
@@ -1326,12 +1360,13 @@ formBuilder.addEventListener('drop', (e) => {
           return true;
       }
 
-      function getFieldPos(field, formType = "form"){
+      function getFieldPos(fieldID, formType = "form"){
           let fields = specs[formType]["fields"];
-          if(fields != null && fields instanceof Array && fields.length > 0){
+          console.log(fields);
+          if(fields != null){
               let i = 0;
               while(i < fields.length){
-                  if(fields[i] != null && fields[i]["id"] === field.getID())
+                  if(fields[i] != null && fields[i]["id"] == fieldID)
                       return i;
                   i++;
               }
@@ -1346,7 +1381,7 @@ formBuilder.addEventListener('drop', (e) => {
               return false;
 
           let fields = specs[formType]["fields"];
-          moveField(field, fields.length-1);
+          moveField(field.getID(), fields.length-1);
           fields.pop();
       }
 
