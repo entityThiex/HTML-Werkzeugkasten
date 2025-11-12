@@ -39,6 +39,7 @@ Auswertung
 
 
 TODO:
+- bild einbinden
 - json update beim verschieben
 - anhang anfügen
 - zip erstellen
