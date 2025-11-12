@@ -891,9 +891,17 @@
     class Radio_MultipleChoicefield extends BaseField {
       constructor(options) {
         super({ ...options, type: "radio_multiple" });
-        this.options = [];
-        this.allowMultiple = false;
+        console.log("here" + options.options)
+          console.log(options.allowMultiple)
+        this.options = options.options || [];
+
+        console.log(this.options)
+        this.allowMultiple = options.allowMultiple || false;
         this.createOptionsInput();
+          if (this.options.length != 0) {
+              console.log(this.options)
+              this.readdOptions();
+          }
         this.titleEl.textContent = "Radio-/Multiple-Choice-Feld";
           updateField(this);
       }
@@ -984,6 +992,13 @@
         this.bodyEl.appendChild(wrapper);
       }
 
+      readdOptions() {
+          this.options.forEach(input => {
+              console.log(input)
+              this.addOption(input.trim())
+          })
+      }
+
       addOption(text) {
         const optionDiv = document.createElement("div");
         optionDiv.style.display = "flex";
@@ -1040,6 +1055,7 @@
 
         optionDiv.appendChild(textContainer);
         optionDiv.appendChild(deleteButton);
+        console.log("test")
         this.optionsContainer.appendChild(optionDiv);
 
         this.updateOptions();
