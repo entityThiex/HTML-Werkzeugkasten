@@ -172,6 +172,32 @@
         height: 50px;
         width: 100%;
     }
+
+    .btn {
+        background-color: #04AA6D;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+    }
+
+    .title {
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    .rightMenu {
+        width: 25%;
+        top: 0;
+        right: 0;
+        position: absolute;
+        height: 50px;
+        display: inline-block;
+    }
+
+    .disapear {
+        display: none;
+    }
   </style>
 </head>
 <body>
@@ -199,7 +225,18 @@
               <button id="exportBtn">Exportieren</button>
           </div>
       </div>
-        <input id="importFile" type="file" accept="*/*" style="width: 25%; box-sizing: border-box;">
+
+      <label for="importFile" class="btn">Import</label>
+      <input id="importFile" type="file" accept="*/*" class="disapear">
+
+      <div class="rightMenu">
+          <label>
+              <input type="text" placeholder="Titel" id="titel" class="title">
+          </label>
+          <label for="logo" class="btn">Logo wählen</label>
+          <input type="file" accept="image/*" id="logo" class="disapear">
+
+      </div>
     </div>
 
     <div class="spacer"></div>
@@ -590,6 +627,7 @@
             if (input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -598,6 +636,7 @@
             if (e.key === "Enter" && input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -818,7 +857,6 @@
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
             this.createPictureInput();
-            this.uploadPicture();
             updateField(this);
         }
 
@@ -853,6 +891,7 @@
                     upload = event.target.result;
                     id.bodyEl.children[1].children[2].src = base64String
                     console.log(id.bodyEl.children[1].children[2].src)
+                    id.repositionAllFields();
                     updateFieldProperties(this.instanceId, {
                         "value": base64String,
                     });
@@ -871,22 +910,6 @@
             wrapper.appendChild(input);
             wrapper.appendChild(img)
             this.bodyEl.appendChild(wrapper);
-        }
-
-        uploadPicture() {
-            console.log(this.bodyEl.children[0])
-            console.log(this.bodyEl.children[0].children[1])
-            this.bodyEl.children[0].children[1].addEventListener("change", function () {
-                console.log("test")
-                let file = this.files[0];
-                let reader = new FileReader();
-
-                reader.onload = function (event) {
-                    let base64String = event.target.result;
-                    console.log(base64String);
-                };
-                reader.readAsDataURL(file);
-            });
         }
 
     }
@@ -1033,6 +1056,7 @@
             if (input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -1041,6 +1065,7 @@
             if (e.key === "Enter" && input.value.trim()) {
                 this.addOption(input.value.trim());
                 input.value = "";
+                this.repositionAllFields();
             }
         });
 
@@ -1493,11 +1518,6 @@ formBuilder.addEventListener('drop', (e) => {
         formLink.download = 'form.html';
         formLink.click();
 
-        let evalLink = document.createElement('a');
-        evalLink.href = URL.createObjectURL(new File([getEvalBlob()], "eval.html"));
-        evalLink.download = 'eval.html';
-        evalLink.click();
-
         let auswertungLink = document.createElement('a');
         auswertungLink.href = URL.createObjectURL(new File([getAuswertungBlob()], "auswertung.html"));
         auswertungLink.download = 'auswertung.html';
@@ -1528,12 +1548,12 @@ formBuilder.addEventListener('drop', (e) => {
           let fields = defaultSpecs[type]["fields"].concat(specs[type]["fields"]);
           let html = new HtmlObj();
           if (fields != null && fields instanceof Array && fields.length > 0){
-              fields.forEach(html.append());
+              fields.forEach(field => html.append(field));
           }
 
           let scripts = defaultSpecs[type]["scripts"].concat(specs[type]["scripts"]);
           if (scripts != null && scripts instanceof Array && scripts.length > 0){
-              scripts.forEach(html.append());
+              scripts.forEach(script => html.append(script));
           }
 
           return html.finish();
@@ -1580,15 +1600,15 @@ formBuilder.addEventListener('drop', (e) => {
           }
 
           append(jsonHtml){
-              if(jsonHtml != null && jsonHtml instanceof JSON && jsonHtml.has("html")){
-                  if (jsonHtml.has("type") && jsonHtml["type"] === "header"){
-                      this.htmlHeader += jsonHtml["html"];
+              if(jsonHtml != null && typeof jsonHtml === 'object' && jsonHtml.html){
+                  if (jsonHtml.type && jsonHtml.type === "header"){
+                      this.htmlHeader += jsonHtml.html;
                   }
-                  else if (jsonHtml.has("type") && jsonHtml["type"] === "body") {
-                      this.htmlBody += jsonHtml["html"];
+                  else if (jsonHtml.type && jsonHtml.type === "body") {
+                      this.htmlBody += jsonHtml.html;
                   }
-                  else if (jsonHtml.has("type") && jsonHtml["type"] === "footer") {
-                      this.htmlFooter += jsonHtml["html"];
+                  else if (jsonHtml.type && jsonHtml.type === "footer") {
+                      this.htmlFooter += jsonHtml.html;
                   }
               }
               return this;

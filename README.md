@@ -39,12 +39,9 @@ Auswertung
 
 
 TODO:
-- bild einbinden
 - json update beim verschieben
 - anhang anfügen
 - zip erstellen
-- auswertung brauchen wir noch ganz
-- form html standard code
 
 Ideen:
 - werkzeugkasten test( word like text editing)
