@@ -39,9 +39,8 @@ Auswertung
 
 
 TODO:
-- checkbox != radio in formular !
-- Bild in auswertung
 - nach jsonloading bild div resize
+- load img title after restore
 
 Ideen:
 - werkzeugkasten test( word like text editing)

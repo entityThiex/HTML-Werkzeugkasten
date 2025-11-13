@@ -826,7 +826,7 @@
         constructor(options) {
             super({...options, type: "picture"});
             this.titleEl.textContent = "Bild";
-            this.value = options.value || "";
+            this.src = options.src || "";
             this.createPictureInput();
             updateField(this);
         }
@@ -875,7 +875,7 @@
                         id.bodyEl.children[1].children[2].style.display = "block"
                         id.repositionAllFields();
                         updateFieldProperties(instanceID, {
-                            "value": base64String,
+                            "src": base64String,
                         });
                     }
                 };
@@ -890,8 +890,8 @@
             wrapper.appendChild(input);
             wrapper.appendChild(img)
             this.bodyEl.appendChild(wrapper);
-            if (this.value != null && this.value !== "") {
-                id.bodyEl.children[1].children[2].src = this.value;
+            if (this.src != null && this.src !== "") {
+                id.bodyEl.children[1].children[2].src = this.src;
                 id.bodyEl.children[1].children[2].style.display = "block"
                 id.repositionAllFields();
             }
@@ -899,9 +899,9 @@
 
         createPicture() {
             const wrapper = document.createElement("div");
-            if (this.value) {
+            if (this.src) {
                 const img = document.createElement("img");
-                img.src = this.value;
+                img.src = this.src;
                 img.alt = this.title;
                 img.style.maxWidth = "100%";
                 img.style.maxHeight = "400px";
@@ -1337,6 +1337,9 @@
             formSpecs = specs[formType]["fields"];
         }
 
+        document.getElementById("title").value = specs["vars"]["title"];
+        document.getElementById("preview").src = specs["vars"]["image"];
+
         for (let i = 0; i < formSpecs.length; i++) {
             renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
         }
@@ -1491,6 +1494,7 @@
             reader.readAsText(file, "UTF-8");
             reader.onloadend = function (evt) {
                 let loadedSpecs = JSON.parse(evt.target.result);
+                console.log(loadedSpecs);
                 render(loadedSpecs);
             }
         }
@@ -2744,15 +2748,15 @@ async function collectFormData() {
         class PictureFormField extends BaseFormField{
             constructor(config) {
                 super(config);
-                this.value = config.value || "";
+                this.src = config.src || "";
                 this.createPicture();
             }
 
             createPicture(){
                 const wrapper = document.createElement("div");
-                if (this.value) {
+                if (this.src) {
                     const img = document.createElement("img");
-                    img.src = this.value;
+                    img.src = this.src;
                     img.alt = this.title;
                     img.style.maxWidth = "100%";
                     img.style.maxHeight = "400px";
