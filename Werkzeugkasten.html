@@ -1333,12 +1333,14 @@
         container.innerHTML = "";
 
         let formSpecs = givenSpecs[formType]["fields"]
+        let varSpecs = givenSpecs["vars"];
         if (givenSpecs === null) {
             formSpecs = specs[formType]["fields"];
+            varSpecs = specs["vars"];
         }
 
-        document.getElementById("title").value = specs["vars"]["title"];
-        document.getElementById("preview").src = specs["vars"]["image"];
+        document.getElementById("title").value = varSpecs["title"];
+        document.getElementById("preview").src = varSpecs["image"];
 
         for (let i = 0; i < formSpecs.length; i++) {
             renderField(formSpecs[i]["class"], formSpecs[i]["config"]);
