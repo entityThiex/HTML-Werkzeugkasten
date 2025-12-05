@@ -1815,7 +1815,7 @@
 
     function exportSpecs() {
         let jsonLink = document.createElement('a');
-        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(this.json)], {type: 'application/json'})], "specs.json"));
+        jsonLink.href = URL.createObjectURL(new File([new Blob([JSON.stringify(specs)], {type: 'application/json'})], "specs.json"));
         jsonLink.download = 'specs.json';
         jsonLink.click();
     }
